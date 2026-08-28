@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import './styles/index.css';
 import './styles/auth.css';
 import './styles/dashboard.css';
+import './styles/swipe.css';
 import './styles/profile.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -1,0 +1,288 @@
+/* Swipe View & Card Stack Styles */
+.swipe-container {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Floating Boost Banner Popup */
+.boost-floating-popup {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #FF4D85 0%, #FF9E00 100%);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 77, 133, 0.4);
+  z-index: 20;
+  animation: fadeIn 0.3s ease;
+  white-space: nowrap;
+}
+
+.boost-floating-popup:hover {
+  transform: translateX(-50%) scale(1.04);
+}
+
+/* Card Stack */
+.card-stack-wrap {
+  width: 100%;
+  height: min(540px, calc(100dvh - 170px));
+  min-height: 400px;
+  position: relative;
+  perspective: 1000px;
+  user-select: none;
+}
+
+.swipe-card {
+  position: absolute;
+  inset: 0;
+  border-radius: clamp(18px, 14px + 1vw, 26px);
+  overflow: hidden;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  cursor: grab;
+  touch-action: none;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+}
+
+.swipe-card.back-card {
+  transform: scale(0.95) translateY(12px);
+  z-index: 1;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.swipe-card.active-card {
+  z-index: 2;
+}
+
+.swipe-card.active-card:active {
+  cursor: grabbing;
+}
+
+/* Card Photo Carousel & Pagination Bars */
+.photo-pagination-bars {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.photo-bar-segment {
+  height: 3.5px;
+  flex: 1;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+  transition: background-color 0.2s ease;
+}
+
+.photo-bar-segment.active {
+  background: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Touch navigation tap zones on card */
+.photo-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 120px;
+  width: 50%;
+  z-index: 5;
+  cursor: pointer;
+}
+.photo-tap-zone.left { left: 0; }
+.photo-tap-zone.right { right: 0; }
+
+/* Swipe Stamp Overlays (LIKE / PASS / SUPERLIKE) */
+.stamp-overlay {
+  position: absolute;
+  top: 2.5rem;
+  padding: 0.4rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 900;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  z-index: 12;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.stamp-like {
+  left: 1.5rem;
+  color: #10B981;
+  border: 4px solid #10B981;
+  transform: rotate(-16deg);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.stamp-pass {
+  right: 1.5rem;
+  color: #EF4444;
+  border: 4px solid #EF4444;
+  transform: rotate(16deg);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.stamp-superlike {
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  color: #3B82F6;
+  border: 4px solid #3B82F6;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* Action Control Bar with 5 Flutter Buttons (Rewind, Pass, Superlike, Like, Gift/Meetup) */
+.swipe-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 0.4rem + 1vw, 1.1rem);
+  margin-top: 1.1rem;
+  width: 100%;
+}
+
+.action-circle-btn {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+}
+
+.action-circle-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.action-circle-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-rewind {
+  width: 44px;
+  height: 44px;
+  color: #F59E0B;
+}
+
+.btn-pass-action {
+  width: 54px;
+  height: 54px;
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.btn-superlike-action {
+  width: 44px;
+  height: 44px;
+  color: #3B82F6;
+}
+
+.btn-like-action {
+  width: 64px;
+  height: 64px;
+  background: var(--primary-gradient);
+  border: none;
+  color: #FFFFFF;
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.btn-gift-action {
+  width: 44px;
+  height: 44px;
+  color: #8B5CF6;
+}
+
+/* Profile Detail Sheet Modal */
+.detail-sheet-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.detail-sheet-content {
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  background: var(--bg-card-solid);
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  border: 1px solid var(--border-light);
+  border-bottom: none;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 0.25s ease;
+}
+
+/* Match Confetti Modal */
+.match-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 77, 133, 0.3) 0%, rgba(9, 9, 13, 0.95) 85%);
+  backdrop-filter: blur(12px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.match-success-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.match-avatars-overlap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0 2rem;
+}
+
+.match-avatar-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3.5px solid var(--primary);
+  object-fit: cover;
+  box-shadow: 0 8px 24px var(--primary-glow);
+}
+
+.match-avatar-circle:last-child {
+  margin-left: -24px;
+}

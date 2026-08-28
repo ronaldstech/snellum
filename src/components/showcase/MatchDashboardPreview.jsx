@@ -1,95 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, X, Sparkles, MessageCircle, LogOut, Flame, ShieldCheck, Loader2, User } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import React, { useState } from 'react';
+import { MessageCircle, LogOut, Flame, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { profileService } from '../../services/authService';
+import SwipeView from '../swipe/SwipeView';
 import ProfileScreen from '../profile/ProfileScreen';
 import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/dashboard.css';
 
-const DEFAULT_MATCHES = [
-  {
-    uid: 'm1',
-    displayName: 'Vanessa Banda',
-    age: 23,
-    occupation: 'Fashion Designer',
-    location: 'Lilongwe (4 km away)',
-    bio: 'Looking for genuine vibes, laughter, and someone who appreciates art and sunset drives 🌅',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
-    tags: ['Art & Design', 'Coffee', 'Travel', 'Music'],
-    matchRate: '98%',
-    isVerified: true,
-  },
-  {
-    uid: 'm2',
-    displayName: 'Alinafe Phiri',
-    age: 25,
-    occupation: 'Software Engineer & Musician',
-    location: 'Blantyre (12 km away)',
-    bio: 'Coding by day, acoustic guitar by night. Let’s grab a cocktail and talk about our dream travel spots! 🎶',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
-    tags: ['Tech', 'Music', 'Hiking', 'Photography'],
-    matchRate: '95%',
-    isVerified: true,
-  },
-  {
-    uid: 'm3',
-    displayName: 'Chisomo Tembo',
-    age: 24,
-    occupation: 'Culinary Chef',
-    location: 'Mzuzu (6 km away)',
-    bio: 'I can cook the best food you’ve ever tasted. Tell me your favorite dish and let’s see if we match! 🍝',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80',
-    tags: ['Cooking', 'Foodie', 'Fitness', 'Cinema'],
-    matchRate: '91%',
-    isVerified: true,
-  },
-];
-
 export default function MatchDashboardPreview() {
   const { user, userProfile, logout, showToast } = useAuth();
-  // Active Tab state: 'discover' | 'messages' | 'profile'
   const [activeTab, setActiveTab] = useState('discover');
-  const [matches, setMatches] = useState(DEFAULT_MATCHES);
-  const [matchIndex, setMatchIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch real users from Firestore collection 'users'
-  useEffect(() => {
-    async function loadFirestoreUsers() {
-      try {
-        if (user?.uid) {
-          const firestoreUsers = await profileService.getDiscoveryUsers(user.uid);
-          if (firestoreUsers && firestoreUsers.length > 0) {
-            setMatches(firestoreUsers);
-          }
-        }
-      } catch (err) {
-        console.warn('Using default matches feed:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadFirestoreUsers();
-  }, [user]);
-
-  const currentMatch = matches[matchIndex % matches.length];
-
-  const handleLike = () => {
-    confetti({
-      particleCount: 70,
-      spread: 60,
-      origin: { y: 0.65 },
-      colors: ['#FF4D85', '#FF85A1', '#8B5CF6'],
-    });
-    showToast(`You liked ${currentMatch.displayName || currentMatch.name}! It's a match! 🎉`, 'success');
-    setMatchIndex((prev) => prev + 1);
-  };
-
-  const handlePass = () => {
-    showToast(`Passed on ${currentMatch.displayName || currentMatch.name}`, 'info');
-    setMatchIndex((prev) => prev + 1);
-  };
 
   return (
     <div className="dashboard-layout">
@@ -107,7 +26,7 @@ export default function MatchDashboardPreview() {
             </span>
           </div>
 
-          {/* Navigation Tabs including Discover, Messages, and Profile */}
+          {/* Desktop Navigation Tabs */}
           <div className="dashboard-nav-tabs">
             <button
               type="button"
@@ -188,85 +107,8 @@ export default function MatchDashboardPreview() {
           </div>
         </main>
       ) : (
-        /* Discovery Canvas */
         <main className="dashboard-main">
-          {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '350px', gap: '1rem' }}>
-              <Loader2 size={32} color="var(--primary)" className="animate-spin" />
-              <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Loading discovery...</span>
-            </div>
-          ) : (
-            <>
-              <div className="match-card animate-fade-in">
-                {/* Profile Image */}
-                <img
-                  src={currentMatch.avatar || currentMatch.photos?.[0] || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80'}
-                  alt={currentMatch.displayName || currentMatch.firstName}
-                  className="match-card-image"
-                />
-
-                {/* Floating badges */}
-                <div className="match-card-top-badges">
-                  {currentMatch.isVerified && (
-                    <div className="badge-verified">
-                      <ShieldCheck size={13} /> Verified
-                    </div>
-                  )}
-
-                  <div className="badge-match-rate">
-                    <Sparkles size={12} /> {currentMatch.matchRate || '96% Match'}
-                  </div>
-                </div>
-
-                {/* Card Bottom Gradient Content */}
-                <div className="match-card-content">
-                  <h2 className="match-card-title">
-                    {currentMatch.displayName || currentMatch.firstName}, {currentMatch.age || 23}
-                  </h2>
-                  <p className="match-card-meta">
-                    {currentMatch.occupation || 'Member'} • {currentMatch.location || 'Malawi'}
-                  </p>
-                  {currentMatch.bio && (
-                    <p className="match-card-bio">
-                      "{currentMatch.bio}"
-                    </p>
-                  )}
-
-                  {/* Interest Tags */}
-                  {currentMatch.tags && (
-                    <div className="match-card-tags">
-                      {currentMatch.tags.slice(0, 3).map((tag, i) => (
-                        <span key={i} className="match-tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="match-actions-bar">
-                <button
-                  type="button"
-                  onClick={handlePass}
-                  className="action-btn-pass"
-                  title="Pass"
-                >
-                  <X size={22} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleLike}
-                  className="action-btn-like"
-                  title="Like & Connect"
-                >
-                  <Heart size={28} fill="#FFFFFF" />
-                </button>
-              </div>
-            </>
-          )}
+          <SwipeView />
         </main>
       )}
 
