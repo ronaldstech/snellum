@@ -1,0 +1,16 @@
+export const COUNTRY_CODES = [
+  { code: 'MW', name: 'Malawi', dial_code: '+265', flag: '🇲🇼' },
+  { code: 'ZA', name: 'South Africa', dial_code: '+27', flag: '🇿🇦' },
+  { code: 'ZM', name: 'Zambia', dial_code: '+260', flag: '🇿🇲' },
+  { code: 'ZW', name: 'Zimbabwe', dial_code: '+263', flag: '🇿🇼' },
+  { code: 'TZ', name: 'Tanzania', dial_code: '+255', flag: '🇹🇿' },
+  { code: 'KE', name: 'Kenya', dial_code: '+254', flag: '🇰🇪' },
+  { code: 'NG', name: 'Nigeria', dial_code: '+234', flag: '🇳🇬' },
+  { code: 'GH', name: 'Ghana', dial_code: '+233', flag: '🇬🇭' },
+  { code: 'US', name: 'United States', dial_code: '+1', flag: '🇺🇸' },
+  { code: 'GB', name: 'United Kingdom', dial_code: '+44', flag: '🇬🇧' },
+  { code: 'CA', name: 'Canada', dial_code: '+1', flag: '🇨🇦' },
+  { code: 'AU', name: 'Australia', dial_code: '+61', flag: '🇦🇺' },
+  { code: 'AE', name: 'United Arab Emirates', dial_code: '+971', flag: '🇦🇪' },
+  { code: 'IN', name: 'India', dial_code: '+91', flag: '🇮🇳' },
+];

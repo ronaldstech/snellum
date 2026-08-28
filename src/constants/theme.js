@@ -1,0 +1,30 @@
+export const THEME_CONFIG = {
+  colors: {
+    primary: '#FF4D85',
+    primaryHover: '#E63970',
+    primaryGlow: 'rgba(255, 77, 133, 0.45)',
+    secondary: '#FF85A1',
+    accentPurple: '#8B5CF6',
+    accentGold: '#F59E0B',
+    dark: {
+      bg: '#09090D',
+      surface: '#111118',
+      surfaceLight: '#181824',
+      border: 'rgba(255, 255, 255, 0.1)',
+      borderFocus: 'rgba(255, 77, 133, 0.6)',
+      text: '#FFFFFF',
+      textMuted: '#9E9EA7',
+      textSubtle: '#6B6B76',
+    },
+    light: {
+      bg: '#F8F9FA',
+      surface: '#FFFFFF',
+      surfaceLight: '#F1F3F5',
+      border: 'rgba(0, 0, 0, 0.08)',
+      borderFocus: 'rgba(255, 77, 133, 0.6)',
+      text: '#0F1117',
+      textMuted: '#6B7280',
+      textSubtle: '#9CA3AF',
+    },
+  },
+};
