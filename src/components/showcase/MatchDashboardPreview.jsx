@@ -1,25 +1,78 @@
 import React, { useState } from 'react';
-import { MessageCircle, LogOut, Flame, User } from 'lucide-react';
+import {
+  Flame,
+  Compass,
+  Heart,
+  MessageCircle,
+  Radio,
+  Coffee,
+  Crown,
+  User,
+  Settings,
+  Bell,
+  LogOut,
+  Zap,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import SwipeView from '../swipe/SwipeView';
+import ExploreScreen from '../explore/ExploreScreen';
+import LikesScreen from '../likes/LikesScreen';
+import ChatList from '../chat/ChatList';
+import ChatWindow from '../chat/ChatWindow';
+import LiveRadarScreen from '../live/LiveRadarScreen';
+import MeetupsScreen from '../meetups/MeetupsScreen';
 import ProfileScreen from '../profile/ProfileScreen';
+import PremiumStoreModal from '../premium/PremiumStoreModal';
+import NotificationDrawer from '../notifications/NotificationDrawer';
+import SettingsModal from '../settings/SettingsModal';
 import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/dashboard.css';
 
 export default function MatchDashboardPreview() {
   const { user, userProfile, logout, showToast } = useAuth();
-  const [activeTab, setActiveTab] = useState('discover');
+
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | live | meetups | profile
+  const [selectedChat, setSelectedChat] = useState(null);
+
+  // Modals & Drawers
+  const [showPremiumStore, setShowPremiumStore] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const handleStartChatWithPartner = (partner) => {
+    setSelectedChat({
+      id: `chat_${partner.uid || Date.now()}`,
+      participantDetails: {
+        [user?.uid || 'me']: { name: 'You' },
+        [partner.uid]: {
+          name: partner.firstName || partner.name || 'Member',
+          avatar: partner.photo || partner.avatar || '',
+        },
+      },
+    });
+    setActiveTab('messages');
+  };
 
   return (
     <div className="dashboard-layout">
       {/* Top Navbar */}
       <header className="dashboard-header">
         <div className="dashboard-header-inner">
-          <div className="dashboard-brand" onClick={() => setActiveTab('discover')} style={{ cursor: 'pointer' }}>
+          <div
+            className="dashboard-brand"
+            onClick={() => {
+              setActiveTab('discover');
+              setSelectedChat(null);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             <img
               src="/newlogo.png"
               alt="Snellum"
-              onError={(e) => { e.target.src = '/logo.png'; }}
+              onError={(e) => {
+                e.target.src = '/logo.png';
+              }}
             />
             <span>
               Snellum<span style={{ color: 'var(--primary)' }}>.</span>
@@ -31,43 +84,115 @@ export default function MatchDashboardPreview() {
             <button
               type="button"
               className={`nav-tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
-              onClick={() => setActiveTab('discover')}
+              onClick={() => {
+                setActiveTab('discover');
+                setSelectedChat(null);
+              }}
             >
               <Flame size={16} /> Discover
             </button>
 
             <button
               type="button"
-              className={`nav-tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
               onClick={() => {
-                setActiveTab('messages');
-                showToast('Messages feature coming next!', 'info');
+                setActiveTab('explore');
+                setSelectedChat(null);
               }}
+            >
+              <Compass size={16} /> Explore
+            </button>
+
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === 'likes' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('likes');
+                setSelectedChat(null);
+              }}
+            >
+              <Heart size={16} /> Likes
+            </button>
+
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+              onClick={() => setActiveTab('messages')}
             >
               <MessageCircle size={16} /> Messages
             </button>
 
             <button
               type="button"
-              className={`nav-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
+              className={`nav-tab-btn ${activeTab === 'live' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('live');
+                setSelectedChat(null);
+              }}
             >
-              <User size={16} /> Profile
+              <Radio size={16} /> Live Radar
+            </button>
+
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === 'meetups' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('meetups');
+                setSelectedChat(null);
+              }}
+            >
+              <Coffee size={16} /> Meetups
             </button>
           </div>
 
           {/* Right User Bar */}
           <div className="dashboard-user-bar">
+            {/* Sparks & VIP Store Button */}
+            <button
+              type="button"
+              className="btn-sparks-badge"
+              onClick={() => setShowPremiumStore(true)}
+              title="Sparks & VIP Store"
+            >
+              <Zap size={15} color="#F59E0B" />
+              <span>{userProfile?.sparks || 100}</span>
+            </button>
+
+            {/* Notifications */}
+            <button
+              type="button"
+              className="btn-ghost notif-btn"
+              onClick={() => setShowNotifications(true)}
+              title="Notifications"
+            >
+              <Bell size={16} />
+              <span className="notif-badge-dot" />
+            </button>
+
             <ThemeToggle />
 
+            {/* Profile Avatar Pill */}
             <div
               className="user-pill"
-              onClick={() => setActiveTab('profile')}
-              style={{ cursor: 'pointer', border: activeTab === 'profile' ? '1px solid var(--primary)' : '1px solid var(--border-light)' }}
+              onClick={() => {
+                setActiveTab('profile');
+                setSelectedChat(null);
+              }}
+              style={{
+                cursor: 'pointer',
+                border:
+                  activeTab === 'profile'
+                    ? '1px solid var(--primary)'
+                    : '1px solid var(--border-light)',
+              }}
               title="View Profile"
             >
               <img
-                src={userProfile?.avatar || user?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'}
+                src={
+                  userProfile?.avatar ||
+                  user?.photoURL ||
+                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
+                }
                 alt={userProfile?.displayName || 'User'}
               />
               <span className="user-pill-name">
@@ -75,75 +200,164 @@ export default function MatchDashboardPreview() {
               </span>
             </div>
 
+            {/* Settings */}
             <button
               type="button"
-              onClick={logout}
+              onClick={() => setShowSettings(true)}
               className="btn-ghost"
-              style={{ padding: '0.4rem 0.65rem' }}
-              title="Sign Out"
+              style={{ padding: '0.4rem 0.55rem' }}
+              title="Settings"
             >
-              <LogOut size={15} />
+              <Settings size={15} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Tab Content */}
-      {activeTab === 'profile' ? (
-        <ProfileScreen onNavigateToDiscover={() => setActiveTab('discover')} />
-      ) : activeTab === 'messages' ? (
-        <main className="dashboard-main">
-          <div className="match-card animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255, 77, 133, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '1rem' }}>
-              <MessageCircle size={30} />
-            </div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Your Matches & Conversations</h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: '320px', marginBottom: '1.5rem' }}>
-              When you and another member like each other, you can start chatting here.
-            </p>
-            <button type="button" className="btn-primary" onClick={() => setActiveTab('discover')}>
-              <Flame size={16} /> Start Discovering
-            </button>
-          </div>
-        </main>
-      ) : (
-        <main className="dashboard-main">
-          <SwipeView />
-        </main>
-      )}
+      {/* Main Content Area */}
+      <main className="dashboard-main">
+        {activeTab === 'discover' && <SwipeView />}
+
+        {activeTab === 'explore' && <ExploreScreen />}
+
+        {activeTab === 'likes' && (
+          <LikesScreen
+            onOpenPremium={() => setShowPremiumStore(true)}
+            onStartChat={handleStartChatWithPartner}
+          />
+        )}
+
+        {activeTab === 'messages' && (
+          selectedChat ? (
+            <ChatWindow
+              chat={selectedChat}
+              currentUser={user || { uid: 'guest' }}
+              userProfile={userProfile}
+              onBack={() => setSelectedChat(null)}
+              onStartVideoCall={(partner) => {
+                setActiveTab('live');
+              }}
+            />
+          ) : (
+            <ChatList
+              currentUserId={user?.uid}
+              onSelectChat={(c) => setSelectedChat(c)}
+              onNavigateToDiscover={() => setActiveTab('discover')}
+            />
+          )
+        )}
+
+        {activeTab === 'live' && (
+          <LiveRadarScreen
+            currentUser={user}
+            userProfile={userProfile}
+          />
+        )}
+
+        {activeTab === 'meetups' && (
+          <MeetupsScreen
+            onStartChat={handleStartChatWithPartner}
+          />
+        )}
+
+        {activeTab === 'profile' && (
+          <ProfileScreen
+            onNavigateToDiscover={() => setActiveTab('discover')}
+          />
+        )}
+      </main>
 
       {/* Mobile Bottom Tab Navigation */}
       <nav className="mobile-bottom-nav">
         <button
           type="button"
           className={`nav-tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
-          onClick={() => setActiveTab('discover')}
-          style={{ flexDirection: 'column', gap: '2px', fontSize: '11px' }}
+          onClick={() => {
+            setActiveTab('discover');
+            setSelectedChat(null);
+          }}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
         >
-          <Flame size={18} /> Discover
+          <Flame size={16} /> Discover
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('explore');
+            setSelectedChat(null);
+          }}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
+        >
+          <Compass size={16} /> Explore
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'likes' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('likes');
+            setSelectedChat(null);
+          }}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
+        >
+          <Heart size={16} /> Likes
+        </button>
+
+        <button
+          type="button"
+          className={`nav-tab-btn ${activeTab === 'live' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveTab('live');
+            setSelectedChat(null);
+          }}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
+        >
+          <Radio size={16} /> Live
         </button>
 
         <button
           type="button"
           className={`nav-tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('messages');
-            showToast('Messages feature coming next!', 'info');
-          }}
-          style={{ flexDirection: 'column', gap: '2px', fontSize: '11px' }}
+          onClick={() => setActiveTab('messages')}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
         >
-          <MessageCircle size={18} /> Messages
+          <MessageCircle size={16} /> Chats
         </button>
 
         <button
           type="button"
           className={`nav-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profile')}
-          style={{ flexDirection: 'column', gap: '2px', fontSize: '11px' }}
+          onClick={() => {
+            setActiveTab('profile');
+            setSelectedChat(null);
+          }}
+          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
         >
-          <User size={18} /> Profile
+          <User size={16} /> Profile
         </button>
       </nav>
+
+      {/* Global Modals & Drawers */}
+      <PremiumStoreModal
+        isOpen={showPremiumStore}
+        onClose={() => setShowPremiumStore(false)}
+      />
+
+      <NotificationDrawer
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNavigateTab={(tab) => {
+          setActiveTab(tab);
+          setSelectedChat(null);
+        }}
+      />
+
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 }

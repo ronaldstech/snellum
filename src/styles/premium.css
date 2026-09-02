@@ -1,0 +1,289 @@
+/* ===================================================
+   PREMIUM & SPARKS STORE STYLES (premium.css)
+   =================================================== */
+
+.premium-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  width: 95%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.premium-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.premium-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.premium-title-group h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.premium-title-group span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.store-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--input-bg);
+  padding: 0.35rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-light);
+}
+
+.store-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.55rem;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.store-tab.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Subscriptions */
+.billing-toggle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.billing-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.billing-btn.active {
+  background: var(--text-main);
+  color: var(--surface);
+  border-color: var(--text-main);
+}
+
+.save-tag {
+  background: #10B981;
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
+.plan-card {
+  position: relative;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.plan-card.selected {
+  border-color: var(--primary);
+  background: rgba(255, 77, 133, 0.05);
+}
+
+.plan-card.popular {
+  border-color: #F59E0B;
+}
+
+.popular-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #F59E0B;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.plan-card h4 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 0.25rem;
+}
+
+.plan-price {
+  margin: 0.5rem 0 1rem 0;
+}
+
+.plan-price strong {
+  font-size: 1.3rem;
+  color: var(--primary);
+}
+
+.plan-price span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.plan-features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.plan-features-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 11.5px;
+  color: var(--text-main);
+}
+
+.btn-plan-select {
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Sparks View */
+.sparks-balance-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(255, 77, 133, 0.15));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+}
+
+.sparks-balance-card span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sparks-balance-card h4 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.sparks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.spark-package-card {
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.spark-icon-circle {
+  font-size: 2rem;
+}
+
+.spark-package-card h4 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.bonus-pill {
+  background: #10B981;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.spark-cost {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.payment-operators-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.operators-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.operator-chip {
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-main);
+}
