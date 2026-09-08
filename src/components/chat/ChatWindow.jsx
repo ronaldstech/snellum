@@ -3,33 +3,20 @@ import {
   ArrowLeft,
   Send,
   Gift,
-  Coffee,
-  Image,
-  Smile,
-  Phone,
-  Video,
-  MoreVertical,
-  Check,
   CheckCheck,
-  Calendar,
-  MapPin,
 } from 'lucide-react';
 import { chatService } from '../../services/chatService';
 import GiftSelectorModal from './GiftSelectorModal';
-import MeetupProposalModal from './MeetupProposalModal';
 import '../../styles/chat.css';
 
 export default function ChatWindow({
   chat,
   currentUser,
-  userProfile,
   onBack,
-  onStartVideoCall,
 }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [showGiftModal, setShowGiftModal] = useState(false);
-  const [showMeetupModal, setShowMeetupModal] = useState(false);
   const messagesEndRef = useRef(null);
 
   const partner =
@@ -76,16 +63,6 @@ export default function ChatWindow({
     });
   };
 
-  const handleSendMeetup = async (meetup) => {
-    setShowMeetupModal(false);
-    await chatService.sendMessage(chat.id, {
-      senderId: currentUser.uid,
-      text: `Proposed a date at ${meetup.location}`,
-      type: 'meetup',
-      meetupData: meetup,
-    });
-  };
-
   return (
     <div className="chat-window-container animate-fade-in">
       {/* Chat Top Bar */}
@@ -103,24 +80,6 @@ export default function ChatWindow({
           </div>
         </div>
 
-        <div className="chat-header-actions">
-          <button
-            type="button"
-            className="btn-icon header-action-btn"
-            onClick={() => onStartVideoCall && onStartVideoCall(partner)}
-            title="Start Video Call"
-          >
-            <Video size={18} />
-          </button>
-          <button
-            type="button"
-            className="btn-icon header-action-btn"
-            onClick={() => setShowMeetupModal(true)}
-            title="Propose Meetup"
-          >
-            <Coffee size={18} />
-          </button>
-        </div>
       </div>
 
       {/* Messages Stream */}
@@ -128,7 +87,7 @@ export default function ChatWindow({
         <div className="chat-start-notice">
           <img src={partner.avatar} alt={partner.name} />
           <p>You matched with <strong>{partner.name}</strong>!</p>
-          <span>Send a cheerful message or propose a coffee date.</span>
+          <span>Send a cheerful message to break the ice.</span>
         </div>
 
         {messages.map((msg, index) => {
@@ -143,28 +102,6 @@ export default function ChatWindow({
                     <strong>{isMine ? 'You sent a gift' : 'Sent you a gift'}</strong>
                     <span>{msg.giftData?.name || 'Gift'}</span>
                   </div>
-                </div>
-              </div>
-            );
-          }
-
-          if (msg.type === 'meetup') {
-            return (
-              <div key={msg.id || index} className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
-                <div className="message-bubble meetup-bubble">
-                  <div className="meetup-bubble-header">
-                    <Coffee size={18} color="var(--primary)" />
-                    <strong>Date Proposal</strong>
-                  </div>
-                  <p className="meetup-bubble-loc">
-                    <MapPin size={14} /> {msg.meetupData?.location || 'Coffee Spot'}
-                  </p>
-                  <p className="meetup-bubble-time">
-                    <Calendar size={14} /> {msg.meetupData?.dateTime || 'This Weekend'}
-                  </p>
-                  {msg.meetupData?.senderNote && (
-                    <p className="meetup-bubble-note">"{msg.meetupData?.senderNote}"</p>
-                  )}
                 </div>
               </div>
             );
@@ -196,14 +133,6 @@ export default function ChatWindow({
           >
             <Gift size={18} />
           </button>
-          <button
-            type="button"
-            className="composer-action-btn"
-            onClick={() => setShowMeetupModal(true)}
-            title="Schedule Meetup"
-          >
-            <Coffee size={18} />
-          </button>
         </div>
 
         <input
@@ -224,14 +153,6 @@ export default function ChatWindow({
         <GiftSelectorModal
           onSelect={handleSendGift}
           onClose={() => setShowGiftModal(false)}
-        />
-      )}
-
-      {showMeetupModal && (
-        <MeetupProposalModal
-          partner={partner}
-          onSubmit={handleSendMeetup}
-          onClose={() => setShowMeetupModal(false)}
         />
       )}
     </div>

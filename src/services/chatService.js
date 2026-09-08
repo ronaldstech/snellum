@@ -107,8 +107,8 @@ export const chatService = {
     );
   },
 
-  // Send a message (text, gift, image, or meetup card)
-  async sendMessage(chatId, { senderId, text, type = 'text', mediaUrl = null, giftData = null, meetupData = null }) {
+  // Send a message (text, gift, or image)
+  async sendMessage(chatId, { senderId, text, type = 'text', mediaUrl = null, giftData = null }) {
     if (!db || !chatId) return;
 
     const messagesCol = collection(db, 'chats', chatId, 'messages');
@@ -118,7 +118,6 @@ export const chatService = {
       type,
       mediaUrl,
       giftData,
-      meetupData,
       timestamp: serverTimestamp(),
       isRead: false,
     };
@@ -131,8 +130,6 @@ export const chatService = {
       lastMessage:
         type === 'gift'
           ? `🎁 Sent a gift: ${giftData?.name || 'Gift'}`
-          : type === 'meetup'
-          ? '☕ Proposed a Meetup'
           : text,
       lastMessageTime: serverTimestamp(),
       lastMessageSenderId: senderId,

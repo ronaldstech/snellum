@@ -4,13 +4,9 @@ import {
   Compass,
   Heart,
   MessageCircle,
-  Radio,
-  Coffee,
-  Crown,
   User,
   Settings,
   Bell,
-  LogOut,
   Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -19,8 +15,6 @@ import ExploreScreen from '../explore/ExploreScreen';
 import LikesScreen from '../likes/LikesScreen';
 import ChatList from '../chat/ChatList';
 import ChatWindow from '../chat/ChatWindow';
-import LiveRadarScreen from '../live/LiveRadarScreen';
-import MeetupsScreen from '../meetups/MeetupsScreen';
 import ProfileScreen from '../profile/ProfileScreen';
 import PremiumStoreModal from '../premium/PremiumStoreModal';
 import NotificationDrawer from '../notifications/NotificationDrawer';
@@ -32,7 +26,7 @@ export default function MatchDashboardPreview() {
   const { user, userProfile, logout, showToast } = useAuth();
 
   // Navigation State
-  const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | live | meetups | profile
+  const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | profile
   const [selectedChat, setSelectedChat] = useState(null);
 
   // Modals & Drawers
@@ -122,27 +116,6 @@ export default function MatchDashboardPreview() {
               <MessageCircle size={16} /> Messages
             </button>
 
-            <button
-              type="button"
-              className={`nav-tab-btn ${activeTab === 'live' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab('live');
-                setSelectedChat(null);
-              }}
-            >
-              <Radio size={16} /> Live Radar
-            </button>
-
-            <button
-              type="button"
-              className={`nav-tab-btn ${activeTab === 'meetups' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab('meetups');
-                setSelectedChat(null);
-              }}
-            >
-              <Coffee size={16} /> Meetups
-            </button>
           </div>
 
           {/* Right User Bar */}
@@ -232,11 +205,7 @@ export default function MatchDashboardPreview() {
             <ChatWindow
               chat={selectedChat}
               currentUser={user || { uid: 'guest' }}
-              userProfile={userProfile}
               onBack={() => setSelectedChat(null)}
-              onStartVideoCall={(partner) => {
-                setActiveTab('live');
-              }}
             />
           ) : (
             <ChatList
@@ -245,19 +214,6 @@ export default function MatchDashboardPreview() {
               onNavigateToDiscover={() => setActiveTab('discover')}
             />
           )
-        )}
-
-        {activeTab === 'live' && (
-          <LiveRadarScreen
-            currentUser={user}
-            userProfile={userProfile}
-          />
-        )}
-
-        {activeTab === 'meetups' && (
-          <MeetupsScreen
-            onStartChat={handleStartChatWithPartner}
-          />
         )}
 
         {activeTab === 'profile' && (
@@ -303,18 +259,6 @@ export default function MatchDashboardPreview() {
           style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
         >
           <Heart size={16} /> Likes
-        </button>
-
-        <button
-          type="button"
-          className={`nav-tab-btn ${activeTab === 'live' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('live');
-            setSelectedChat(null);
-          }}
-          style={{ flexDirection: 'column', gap: '2px', fontSize: '10px' }}
-        >
-          <Radio size={16} /> Live
         </button>
 
         <button

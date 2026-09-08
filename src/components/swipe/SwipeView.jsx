@@ -392,7 +392,7 @@ export default function SwipeView() {
           <Heart size={30} fill="#FFFFFF" />
         </button>
 
-        {/* Send Virtual Gift / Meetup */}
+        {/* Send Virtual Gift */}
         <button
           type="button"
           className="action-circle-btn btn-gift-action"

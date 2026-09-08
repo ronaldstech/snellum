@@ -4,7 +4,6 @@ import {
   Bell,
   Heart,
   MessageCircle,
-  Coffee,
   Sparkles,
   CheckCheck,
 } from 'lucide-react';
@@ -30,16 +29,6 @@ const MOCK_NOTIFICATIONS = [
     icon: Sparkles,
     color: '#F59E0B',
     unread: true,
-  },
-  {
-    id: 'n3',
-    title: 'Date Proposal Received',
-    body: 'Tamandani sent you a coffee meetup proposal.',
-    type: 'meetup',
-    time: '3h ago',
-    icon: Coffee,
-    color: '#10B981',
-    unread: false,
   },
 ];
 
@@ -86,7 +75,6 @@ export default function NotificationDrawer({ isOpen, onClose, onNavigateTab }) {
                 className={`notif-item ${n.unread ? 'unread' : ''}`}
                 onClick={() => {
                   if (n.type === 'match' || n.type === 'like') onNavigateTab('likes');
-                  if (n.type === 'meetup') onNavigateTab('meetups');
                   onClose();
                 }}
               >

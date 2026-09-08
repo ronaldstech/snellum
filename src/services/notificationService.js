@@ -47,7 +47,7 @@ export const notificationService = {
     await addDoc(notifCol, {
       title,
       body,
-      type, // 'like', 'super_like', 'match', 'gift', 'meetup', 'call'
+      type, // 'like', 'super_like', 'match', 'gift', or 'call'
       senderId,
       senderName,
       senderPhoto,

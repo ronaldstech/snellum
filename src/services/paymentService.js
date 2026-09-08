@@ -36,14 +36,14 @@ export const paymentService = {
         weeklyPrice: 'MK 7,000',
         monthlyPrice: 'MK 15,000',
         popular: true,
-        features: ['Unlimited Likes', 'Unlimited Video Matchmaking', 'Priority Match Queue', 'Read Receipts', 'Incognito Mode'],
+        features: ['Unlimited Likes', 'Priority Match Queue', 'Read Receipts', 'Incognito Mode'],
       },
       {
         id: 'elite',
         name: 'Snellum Elite',
         weeklyPrice: 'MK 10,000',
         monthlyPrice: 'MK 30,000',
-        features: ['VIP Verified Badge', 'Direct VIP Chat before match', 'Unlimited Meetup requests', 'Exclusive VIP lounge access'],
+        features: ['VIP Verified Badge', 'Direct VIP Chat before match', 'Priority support', 'Exclusive VIP lounge access'],
       },
     ];
   },

@@ -150,7 +150,7 @@
   background: rgba(59, 130, 246, 0.15);
 }
 
-/* Action Control Bar with 5 Flutter Buttons (Rewind, Pass, Superlike, Like, Gift/Meetup) */
+/* Action Control Bar with 5 actions (Rewind, Pass, Super Like, Like, Gift) */
 .swipe-action-row {
   display: flex;
   align-items: center;
