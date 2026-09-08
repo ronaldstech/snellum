@@ -3,25 +3,25 @@ import {
   doc,
   addDoc,
   updateDoc,
+  writeBatch,
   query,
   where,
-  orderBy,
   onSnapshot,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
 export const notificationService = {
-  // Listen to user's notifications
-  streamNotifications(myUid, callback) {
+  // Matches the Flutter app's top-level `notifications` collection.
+  streamNotifications(myUid, callback, onError = () => {}) {
     if (!db || !myUid) {
       callback([]);
       return () => {};
     }
 
     const q = query(
-      collection(db, 'users', myUid, 'notifications'),
-      orderBy('timestamp', 'desc')
+      collection(db, 'notifications'),
+      where('recipientId', '==', myUid)
     );
 
     return onSnapshot(
@@ -30,37 +30,53 @@ export const notificationService = {
         const list = snap.docs.map((d) => ({
           id: d.id,
           ...d.data(),
-        }));
+        })).sort((a, b) => {
+          const aTime = a.timestamp?.toMillis?.() || 0;
+          const bTime = b.timestamp?.toMillis?.() || 0;
+          return bTime - aTime;
+        });
         callback(list);
       },
       (err) => {
         console.warn('Notifications stream error:', err);
         callback([]);
+        onError(err);
       }
     );
   },
 
-  // Send a notification to another user
-  async sendNotification(targetUid, { title, body, type, senderId, senderName, senderPhoto, data = {} }) {
-    if (!db || !targetUid) return;
-    const notifCol = collection(db, 'users', targetUid, 'notifications');
+  // Send a notification using the shared Flutter/Web schema.
+  async sendNotification(recipientId, { senderId, senderName, type, message = null }) {
+    if (!db || !recipientId || recipientId === senderId) return;
+    const notifCol = collection(db, 'notifications');
     await addDoc(notifCol, {
-      title,
-      body,
-      type, // 'like', 'super_like', 'match', 'gift', or 'call'
+      recipientId,
       senderId,
       senderName,
-      senderPhoto,
+      type,
+      message,
       isRead: false,
-      data,
       timestamp: serverTimestamp(),
     });
   },
 
-  // Mark all notifications as read
-  async markAsRead(myUid, notifId) {
-    if (!db || !myUid || !notifId) return;
-    const docRef = doc(db, 'users', myUid, 'notifications', notifId);
+  // Mark one notification as read
+  async markAsRead(notifId) {
+    if (!db || !notifId) return;
+    const docRef = doc(db, 'notifications', notifId);
     await updateDoc(docRef, { isRead: true }).catch(() => {});
+  },
+
+  async markAllAsRead(notifications) {
+    if (!db) return;
+
+    const unreadNotifications = notifications.filter((notification) => !notification.isRead);
+    if (!unreadNotifications.length) return;
+
+    const batch = writeBatch(db);
+    unreadNotifications.forEach((notification) => {
+      batch.update(doc(db, 'notifications', notification.id), { isRead: true });
+    });
+    await batch.commit();
   },
 };
