@@ -21,12 +21,43 @@ export class UserProfile {
     this.sparks = Number(data.credits ?? data.sparks ?? 100);
     this.isPremium = data.isPremium === true;
     this.occupation = data.occupation || '';
+    this.industry = data.industry || '';
+    this.educationLevel = data.educationLevel || '';
+    this.school = data.school || '';
+    this.height = data.height || '';
+    this.bodyType = data.bodyType || '';
     this.relationshipStatus = data.relationshipStatus || '';
+    this.religion = data.religion || '';
+    this.languages = Array.isArray(data.languages) ? data.languages : [];
+    this.smoking = data.smoking || '';
+    this.drinking = data.drinking || '';
+    this.fitness = data.fitness || '';
+    this.diet = data.diet || '';
+    this.sleepingHabits = data.sleepingHabits || '';
+    this.pets = data.pets || '';
+    this.zodiac = data.zodiac || '';
     this.datingIntent = data.datingIntent || data.category || data.intent || '';
     this.lookingFor = Array.isArray(data.lookingFor)
       ? data.lookingFor
       : (data.lookingFor ? [data.lookingFor] : []);
     this.hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
+    this.musicGenres = Array.isArray(data.musicGenres) ? data.musicGenres : [];
+    this.moviesShows = Array.isArray(data.moviesShows) ? data.moviesShows : [];
+    this.weekendActivities = Array.isArray(data.weekendActivities) ? data.weekendActivities : [];
+    this.introvertExtrovert = data.introvertExtrovert || '';
+    this.loveLanguage = data.loveLanguage || '';
+    this.communicationStyle = data.communicationStyle || '';
+    this.loveStyle = data.loveStyle || '';
+    this.mbti = data.mbti || '';
+    this.politicalViews = data.politicalViews || '';
+    this.coreValues = data.coreValues || '';
+    this.wantKids = data.wantKids || '';
+    this.familyPlans = data.familyPlans || '';
+    this.openToLongDistance = typeof data.openToLongDistance === 'boolean' ? data.openToLongDistance : null;
+    this.promptPerfectDate = data.promptPerfectDate || '';
+    this.promptFallForYou = data.promptFallForYou || '';
+    this.promptGreenFlag = data.promptGreenFlag || '';
+    this.promptTwoTruths = data.promptTwoTruths || '';
     this.tags = data.tags || (this.hobbies.length ? this.hobbies : ['Dating', 'Music', 'Travel']);
     this.matchRate = data.matchRate || '96%';
     this.lastSeen = data.lastSeen || null;
@@ -74,9 +105,41 @@ export class UserProfile {
       credits: this.sparks,
       isPremium: this.isPremium,
       occupation: this.occupation,
+      industry: this.industry,
+      educationLevel: this.educationLevel,
+      school: this.school,
+      height: this.height,
+      bodyType: this.bodyType,
+      relationshipStatus: this.relationshipStatus,
+      religion: this.religion,
+      languages: this.languages,
+      smoking: this.smoking,
+      drinking: this.drinking,
+      fitness: this.fitness,
+      diet: this.diet,
+      sleepingHabits: this.sleepingHabits,
+      pets: this.pets,
+      zodiac: this.zodiac,
       datingIntent: this.datingIntent,
       lookingFor: this.lookingFor,
       hobbies: this.hobbies,
+      musicGenres: this.musicGenres,
+      moviesShows: this.moviesShows,
+      weekendActivities: this.weekendActivities,
+      introvertExtrovert: this.introvertExtrovert,
+      loveLanguage: this.loveLanguage,
+      communicationStyle: this.communicationStyle,
+      loveStyle: this.loveStyle,
+      mbti: this.mbti,
+      politicalViews: this.politicalViews,
+      coreValues: this.coreValues,
+      wantKids: this.wantKids,
+      familyPlans: this.familyPlans,
+      openToLongDistance: this.openToLongDistance,
+      promptPerfectDate: this.promptPerfectDate,
+      promptFallForYou: this.promptFallForYou,
+      promptGreenFlag: this.promptGreenFlag,
+      promptTwoTruths: this.promptTwoTruths,
     };
   }
 

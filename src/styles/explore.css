@@ -415,14 +415,8 @@
     display: none;
   }
 
-  /* A filtered deck needs room for the persistent category header and the
-     complete action row, not only the card itself. */
-  .explore-swipe-deck .swipe-container {
-    padding-top: 1.9rem;
-  }
-
   .explore-swipe-deck .card-stack-wrap {
-    height: clamp(300px, calc(100dvh - 355px), 470px);
+    height: clamp(300px, calc(100dvh - 330px), 470px);
     min-height: 300px;
   }
 

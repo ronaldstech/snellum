@@ -154,6 +154,14 @@ export function AuthProvider({ children }) {
     showToast('You have been signed out.', 'info');
   };
 
+  const spendSparks = (amount) => {
+    setUserProfile((current) => {
+      if (!current) return current;
+      const balance = Number(current.sparks ?? current.credits ?? 0);
+      return new UserProfile({ ...current, sparks: Math.max(0, balance - amount), credits: Math.max(0, balance - amount) });
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -165,6 +173,7 @@ export function AuthProvider({ children }) {
         isFirebaseConfigured,
         toastMessage,
         showToast,
+        spendSparks,
         loginWithEmail,
         signUpWithEmail,
         loginWithGoogle,

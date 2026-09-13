@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Heart,
   X,
@@ -11,17 +12,22 @@ import {
   Info,
   MapPin,
   Briefcase,
-  GraduationCap,
   MessageCircle,
-  ChevronDown,
+  Ruler,
+  UserRound,
+  ChevronLeft,
+  ChevronRight,
+  CalendarPlus,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/authService';
+import { giftService, GIFT_CATALOG } from '../../services/giftService';
+import { meetupService } from '../../services/meetupService';
 import '../../styles/swipe.css';
 
 export default function SwipeView({ categoryFilter }) {
-  const { user, userProfile, showToast } = useAuth();
+  const { user, userProfile, showToast, spendSparks } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -30,15 +36,23 @@ export default function SwipeView({ categoryFilter }) {
   // Swipe gesture & stamp feedback state
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [swipeExit, setSwipeExit] = useState(null);
   const [swipeHistory, setSwipeHistory] = useState([]); // For rewind feature
 
-  // Modals & Floating popups matching Flutter swipe_view
-  const [showBoostPopup, setShowBoostPopup] = useState(true);
+  // Modals matching Flutter swipe_view
   const [matchedUser, setMatchedUser] = useState(null);
   const [detailUser, setDetailUser] = useState(null);
   const [showGiftModal, setShowGiftModal] = useState(false);
+  const [selectedGift, setSelectedGift] = useState(null);
+  const [isSendingGift, setIsSendingGift] = useState(false);
+  const [showMeetupModal, setShowMeetupModal] = useState(false);
+  const [meetupDate, setMeetupDate] = useState(() => new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+  const [meetupNote, setMeetupNote] = useState('');
+  const [isSendingMeetup, setIsSendingMeetup] = useState(false);
+  const [showBoostPrompt, setShowBoostPrompt] = useState(false);
 
   const startPos = useRef({ x: 0, y: 0 });
+  const swipeTimer = useRef(null);
 
   // 1. Fetch Real Profiles from Firestore (with fallbacks)
   useEffect(() => {
@@ -63,6 +77,16 @@ export default function SwipeView({ categoryFilter }) {
     }
     loadFeed();
   }, [user, categoryFilter]);
+
+  useEffect(() => {
+    const reveal = window.setTimeout(() => setShowBoostPrompt(true), 3200);
+    const cycle = window.setInterval(() => setShowBoostPrompt(true), 25000);
+    return () => {
+      window.clearTimeout(reveal);
+      window.clearInterval(cycle);
+      window.clearTimeout(swipeTimer.current);
+    };
+  }, []);
 
   // Reset photo carousel index when active profile changes
   useEffect(() => {
@@ -117,6 +141,62 @@ export default function SwipeView({ categoryFilter }) {
     setCurrentIndex((prev) => prev + 1);
   };
 
+  const runSwipe = (direction) => {
+    if (!currentProfile || swipeExit) return;
+    setIsDragging(false);
+    setSwipeExit(direction);
+    swipeTimer.current = window.setTimeout(() => {
+      handleSwipeAction(direction);
+      setSwipeExit(null);
+      setDragOffset({ x: 0, y: 0 });
+    }, 280);
+  };
+
+  const closeGiftModal = () => {
+    if (isSendingGift) return;
+    setSelectedGift(null);
+    setShowGiftModal(false);
+  };
+
+  const sendGift = async () => {
+    if (!selectedGift || !currentProfile || isSendingGift) return;
+    const balance = Number(userProfile?.sparks ?? userProfile?.credits ?? 0);
+    if (balance < selectedGift.cost) {
+      showToast(`You need ${selectedGift.cost - balance} more sparks for ${selectedGift.name}.`, 'error');
+      return;
+    }
+    setIsSendingGift(true);
+    try {
+      await giftService.sendGift({
+        senderId: user?.uid,
+        senderName: userProfile?.displayName || user?.displayName || 'Someone',
+        recipient: currentProfile,
+        gift: selectedGift,
+      });
+      spendSparks(selectedGift.cost);
+      showToast(`${selectedGift.icon} ${selectedGift.name} sent to ${currentProfile.displayName}!`, 'success');
+      setSelectedGift(null);
+      setShowGiftModal(false);
+    } catch (error) {
+      showToast(error.message || 'Could not send the gift. Please try again.', 'error');
+    } finally {
+      setIsSendingGift(false);
+    }
+  };
+
+  const sendMeetup = async () => {
+    if (!currentProfile || isSendingMeetup) return;
+    const balance = Number(userProfile?.sparks ?? userProfile?.credits ?? 0);
+    if (balance < 100) return showToast('You need 100 sparks to send a meetup request.', 'error');
+    setIsSendingMeetup(true);
+    try {
+      if (await meetupService.hasPending(user?.uid, currentProfile.uid)) throw new Error(`A meetup request to ${currentProfile.displayName} is already pending.`);
+      await meetupService.request({ senderId: user?.uid, senderName: userProfile?.displayName || 'Someone', recipient: currentProfile, dateTime: new Date(meetupDate).toISOString(), note: meetupNote.trim() });
+      spendSparks(100); setShowMeetupModal(false); setMeetupNote(''); showToast('Meetup request sent! 🎉', 'success');
+    } catch (error) { showToast(error.message || 'Could not send meetup request.', 'error'); }
+    finally { setIsSendingMeetup(false); }
+  };
+
   // Rewind Last Action (Flutter feature)
   const handleRewind = () => {
     if (swipeHistory.length === 0 || currentIndex === 0) return;
@@ -143,6 +223,7 @@ export default function SwipeView({ categoryFilter }) {
 
   // Touch & Pointer Gesture Listeners
   const handlePointerDown = (e) => {
+    if (swipeExit) return;
     setIsDragging(true);
     startPos.current = { x: e.clientX || e.touches?.[0]?.clientX || 0, y: e.clientY || e.touches?.[0]?.clientY || 0 };
   };
@@ -163,11 +244,11 @@ export default function SwipeView({ categoryFilter }) {
 
     const threshold = 110;
     if (dragOffset.x > threshold) {
-      handleSwipeAction('like');
+      runSwipe('like');
     } else if (dragOffset.x < -threshold) {
-      handleSwipeAction('pass');
+      runSwipe('pass');
     } else if (dragOffset.y < -threshold) {
-      handleSwipeAction('superlike');
+      runSwipe('superlike');
     } else {
       setDragOffset({ x: 0, y: 0 });
     }
@@ -176,6 +257,14 @@ export default function SwipeView({ categoryFilter }) {
   const cardRotation = dragOffset.x * 0.08;
   const stampOpacity = Math.min(Math.abs(dragOffset.x) / 80, 1);
   const superlikeOpacity = dragOffset.y < -40 ? Math.min(Math.abs(dragOffset.y) / 80, 1) : 0;
+  const dragProgress = Math.min(Math.abs(dragOffset.x) / 180, 1);
+  const exitTransform = swipeExit === 'like'
+    ? 'translate3d(130vw, -4vh, 0) rotate(28deg)'
+    : swipeExit === 'pass'
+      ? 'translate3d(-130vw, -4vh, 0) rotate(-28deg)'
+      : swipeExit === 'superlike'
+        ? 'translate3d(0, -130vh, 0)'
+        : null;
 
   if (loading) {
     return (
@@ -211,22 +300,21 @@ export default function SwipeView({ categoryFilter }) {
   }
 
   return (
-    <div className="swipe-container animate-fade-in">
-      {/* 1. Floating Boost Banner (Flutter Feature) */}
-      {showBoostPopup && (
-        <div
-          className="boost-floating-popup"
-          onClick={() => showToast('Boost activated! Getting 10x visibility 🚀', 'success')}
-        >
-          <Flame size={14} /> Boost your profile for 10x matches!
+    <div className={`swipe-container animate-fade-in ${showBoostPrompt ? 'has-boost-prompt' : ''}`}>
+      {showBoostPrompt && (
+        <div className="boost-floating-popup" role="status">
+          <button type="button" className="boost-message" onClick={() => { setShowBoostPrompt(false); showToast('Boost is coming soon — your profile is already looking great!', 'info'); }}>
+            <Flame size={15} /> Boost your profile for 10× more visibility
+          </button>
+          <button type="button" className="boost-close" onClick={() => setShowBoostPrompt(false)} aria-label="Dismiss boost suggestion">×</button>
         </div>
       )}
 
-      {/* 2. Swipable Card Stack */}
+      {/* Swipable card stack */}
       <div className="card-stack-wrap">
         {/* Next Card (Underneath) */}
         {nextProfile && (
-          <div className="swipe-card back-card">
+          <div className="swipe-card back-card" style={{ transform: `scale(${0.955 + (dragProgress * 0.045)}) translateY(${14 - (dragProgress * 14)}px)`, opacity: 0.68 + (dragProgress * 0.32) }}>
             <img
               src={nextProfile.avatar || nextProfile.photos?.[0]}
               alt=""
@@ -245,25 +333,56 @@ export default function SwipeView({ categoryFilter }) {
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
           style={{
-            transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${cardRotation}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            transform: exitTransform || `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${cardRotation}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)',
           }}
         >
           {/* Photo Pagination Segment Bars */}
           {currentPhotos.length > 1 && (
-            <div className="photo-pagination-bars">
+            <div className="photo-pagination-bars" role="tablist" aria-label="Profile photos">
               {currentPhotos.map((_, i) => (
-                <div
+                <button
+                  type="button"
                   key={i}
                   className={`photo-bar-segment ${i === currentPhotoIndex ? 'active' : ''}`}
+                  role="tab"
+                  aria-selected={i === currentPhotoIndex}
+                  aria-label={`Show photo ${i + 1} of ${currentPhotos.length}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setCurrentPhotoIndex(i);
+                  }}
                 />
               ))}
+              <span className="photo-count" aria-hidden="true">{currentPhotoIndex + 1}/{currentPhotos.length}</span>
             </div>
           )}
 
           {/* Touch navigation tap zones */}
           <div className="photo-tap-zone left" onClick={handlePrevPhoto} />
           <div className="photo-tap-zone right" onClick={handleNextPhoto} />
+          {currentPhotos.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="photo-edge-button photo-edge-button-left"
+                aria-label="Previous photo"
+                disabled={currentPhotoIndex === 0}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
+                onClick={handlePrevPhoto}
+              ><ChevronLeft size={22} /></button>
+              <button
+                type="button"
+                className="photo-edge-button photo-edge-button-right"
+                aria-label="Next photo"
+                disabled={currentPhotoIndex === currentPhotos.length - 1}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
+                onClick={handleNextPhoto}
+              ><ChevronRight size={22} /></button>
+            </>
+          )}
 
           {/* Swipe Stamps */}
           {dragOffset.x > 20 && (
@@ -377,17 +496,21 @@ export default function SwipeView({ categoryFilter }) {
         <button
           type="button"
           className="action-circle-btn btn-pass-action"
-          onClick={() => handleSwipeAction('pass')}
+          onClick={() => runSwipe('pass')}
           title="Pass"
         >
           <X size={24} />
+        </button>
+
+        <button type="button" className="action-circle-btn btn-meet-action" onClick={() => setShowMeetupModal(true)} title="Request a meetup">
+          <CalendarPlus size={20} />
         </button>
 
         {/* Super Like */}
         <button
           type="button"
           className="action-circle-btn btn-superlike-action"
-          onClick={() => handleSwipeAction('superlike')}
+          onClick={() => runSwipe('superlike')}
           title="Super Like"
         >
           <Star size={20} fill="#3B82F6" />
@@ -397,7 +520,7 @@ export default function SwipeView({ categoryFilter }) {
         <button
           type="button"
           className="action-circle-btn btn-like-action"
-          onClick={() => handleSwipeAction('like')}
+          onClick={() => runSwipe('like')}
           title="Like"
         >
           <Heart size={30} fill="#FFFFFF" />
@@ -414,83 +537,55 @@ export default function SwipeView({ categoryFilter }) {
         </button>
       </div>
 
-      {/* 4. Full Profile Detail Sheet Modal (Flutter profile_detail_sheet.dart) */}
-      {detailUser && (
-        <div className="detail-sheet-modal" onClick={() => setDetailUser(null)}>
-          <div className="detail-sheet-content" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <img
-                  src={detailUser.avatar}
-                  alt=""
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
-                />
-                <div>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                    {detailUser.displayName}, {detailUser.age || 23}
-                  </h2>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                    {detailUser.location}
-                  </span>
-                </div>
+      {/* Full profile drawer — mirrors the settings sidebar while keeping actions available. */}
+      {detailUser && createPortal(
+        <div className="drawer-backdrop-fixed animate-fade-in" onClick={() => setDetailUser(null)}>
+          <aside className="profile-detail-drawer animate-slide-left" onClick={(e) => e.stopPropagation()} aria-label={`${detailUser.displayName}'s full profile`}>
+            <header className="profile-detail-header">
+              <div><span>DISCOVER PROFILE</span><h2>{detailUser.displayName}, {detailUser.age || 23}</h2></div>
+              <button type="button" className="notification-close-button" onClick={() => setDetailUser(null)} aria-label="Close profile"><X size={18} /></button>
+            </header>
+            <div className="profile-detail-scroll">
+              <div className="profile-detail-photos">
+                {(detailUser.photos?.length ? detailUser.photos : [detailUser.avatar]).map((photo, index) => <img key={`${photo}-${index}`} src={photo} alt={`${detailUser.displayName} ${index + 1}`} />)}
               </div>
-
-              <button
-                type="button"
-                onClick={() => setDetailUser(null)}
-                className="btn-ghost"
-                style={{ borderRadius: '50%', padding: '0.4rem', width: '32px', height: '32px' }}
-              >
-                <ChevronDown size={18} />
-              </button>
+              <section className="profile-detail-intro">
+                <div>{detailUser.isVerified && <span className="profile-verified"><ShieldCheck size={15} /> Verified</span>}<span className="profile-match"><Sparkles size={14} /> {detailUser.matchRate || '96%'} match</span></div>
+                {(detailUser.occupation || detailUser.location) && <p>{detailUser.occupation && <><Briefcase size={15} /> {detailUser.occupation}</>}{detailUser.occupation && detailUser.location && <i>•</i>}{detailUser.location && <><MapPin size={15} /> {detailUser.location}</>}</p>}
+              </section>
+              {detailUser.bio && <ProfileSection icon={UserRound} title="About me"><p className="profile-detail-bio">{detailUser.bio}</p></ProfileSection>}
+              <ProfileFacts profile={detailUser} />
+              <ProfileFieldList icon={UserRound} title="Personal details" profile={detailUser} fields={[
+                ['Body type', 'bodyType'], ['Relationship status', 'relationshipStatus'], ['Religion', 'religion'], ['Zodiac', 'zodiac'],
+              ]} />
+              {(detailUser.datingIntent || detailUser.lookingFor?.length) && <ProfileSection icon={Heart} title="Relationship goals"><ProfileChips values={[detailUser.datingIntent, ...(detailUser.lookingFor || [])]} accent /></ProfileSection>}
+              <ProfileFieldList icon={Heart} title="Family & connection" profile={detailUser} fields={[
+                ['Open to long distance', 'openToLongDistance', (value) => value ? 'Yes' : 'No'], ['Wants children', 'wantKids'], ['Family plans', 'familyPlans'],
+              ]} />
+              <ProfileFieldList icon={Briefcase} title="Work & education" profile={detailUser} fields={[
+                ['Occupation', 'occupation'], ['Industry', 'industry'], ['Education', 'educationLevel'], ['School', 'school'],
+              ]} />
+              <ProfileFieldList icon={Sparkles} title="Lifestyle & habits" profile={detailUser} fields={[
+                ['Smoking', 'smoking'], ['Drinking', 'drinking'], ['Fitness', 'fitness'], ['Diet', 'diet'], ['Sleep', 'sleepingHabits'], ['Pets', 'pets'],
+              ]} />
+              {detailUser.languages?.length > 0 && <ProfileSection icon={MessageCircle} title="Languages"><ProfileChips values={detailUser.languages} /></ProfileSection>}
+              {(detailUser.hobbies?.length || detailUser.tags?.length) && <ProfileSection icon={Sparkles} title="Interests & hobbies"><ProfileChips values={detailUser.hobbies?.length ? detailUser.hobbies : detailUser.tags} /></ProfileSection>}
+              {detailUser.musicGenres?.length > 0 && <ProfileSection icon={Sparkles} title="Music taste"><ProfileChips values={detailUser.musicGenres} /></ProfileSection>}
+              {detailUser.moviesShows?.length > 0 && <ProfileSection icon={Sparkles} title="Movies & shows"><ProfileChips values={detailUser.moviesShows} /></ProfileSection>}
+              {detailUser.weekendActivities?.length > 0 && <ProfileSection icon={Sparkles} title="Weekends"><ProfileChips values={detailUser.weekendActivities} /></ProfileSection>}
+              <ProfileFieldList icon={UserRound} title="Personality & values" profile={detailUser} fields={[
+                ['Social style', 'introvertExtrovert'], ['Love language', 'loveLanguage'], ['Communication style', 'communicationStyle'], ['Love style', 'loveStyle'], ['MBTI', 'mbti'], ['Political views', 'politicalViews'], ['Core values', 'coreValues'],
+              ]} />
+              <ProfilePrompts profile={detailUser} />
             </div>
-
-            {detailUser.bio && (
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.3rem' }}>About</h4>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-main)', lineHeight: '1.5' }}>
-                  {detailUser.bio}
-                </p>
-              </div>
-            )}
-
-            <div>
-              <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Interests</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                {(detailUser.tags || ['Travel', 'Music', 'Coffee']).map((tag, i) => (
-                  <span key={i} className="chip-btn selected">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <button
-                type="button"
-                className="btn-ghost"
-                style={{ flex: 1 }}
-                onClick={() => {
-                  setDetailUser(null);
-                  handleSwipeAction('pass');
-                }}
-              >
-                <X size={16} /> Pass
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                style={{ flex: 1 }}
-                onClick={() => {
-                  setDetailUser(null);
-                  handleSwipeAction('like');
-                }}
-              >
-                <Heart size={16} fill="#FFFFFF" /> Like Profile
-              </button>
-            </div>
-          </div>
+            <footer className="profile-detail-actions">
+              <button type="button" className="btn-ghost" onClick={() => { setDetailUser(null); runSwipe('pass'); }}><X size={17} /> Pass</button>
+              <button type="button" className="btn-primary" onClick={() => { setDetailUser(null); runSwipe('like'); }}><Heart size={17} fill="#FFFFFF" /> Like</button>
+              <button type="button" className="profile-message-button" onClick={() => showToast(`Messaging ${detailUser.displayName} is coming soon.`, 'info')} aria-label={`Message ${detailUser.displayName}`}><MessageCircle size={19} /></button>
+            </footer>
+          </aside>
         </div>
+        , document.body
       )}
 
       {/* 5. Mutual "It's a Match!" Celebration Modal */}
@@ -552,48 +647,79 @@ export default function SwipeView({ categoryFilter }) {
         </div>
       )}
 
-      {/* 6. Virtual Sparks Gift Modal (Flutter gift_selection_sheet.dart) */}
       {showGiftModal && (
-        <div className="modal-overlay" onClick={() => setShowGiftModal(false)}>
-          <div className="edit-profile-modal animate-fade-in" style={{ maxWidth: '380px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={closeGiftModal}>
+          <div className="gift-modal animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>Send Sparks Gift 🎁</h3>
-              <button type="button" onClick={() => setShowGiftModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <X size={18} />
-              </button>
+              <div><h3>Send a gift</h3><span className="gift-balance">✦ {Number(userProfile?.sparks ?? userProfile?.credits ?? 0)} sparks</span></div>
+              <button type="button" onClick={closeGiftModal} className="gift-close" disabled={isSendingGift} aria-label="Close gift selection"><X size={18} /></button>
             </div>
-            <div className="edit-modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Send a surprise gift to <strong style={{ color: 'var(--text-main)' }}>{currentProfile.displayName}</strong> to stand out!
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                {[
-                  { icon: '🌹', name: 'Rose', cost: 20 },
-                  { icon: '💎', name: 'Diamond', cost: 50 },
-                  { icon: '👑', name: 'Crown', cost: 100 },
-                ].map((g, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="profile-stat-box"
-                    style={{ cursor: 'pointer', border: '1px solid var(--border-light)' }}
-                    onClick={() => {
-                      setShowGiftModal(false);
-                      showToast(`Sent ${g.name} to ${currentProfile.displayName}! (-${g.cost} sparks)`, 'success');
-                    }}
-                  >
-                    <span style={{ fontSize: '1.8rem' }}>{g.icon}</span>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)' }}>{g.name}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--primary)' }}>{g.cost} sparks</span>
-                  </button>
-                ))}
+            <div className="gift-modal-body">
+              <p>Surprise <strong>{currentProfile.displayName}</strong> with something special.</p>
+              <div className="gift-grid">
+                {GIFT_CATALOG.map((gift) => {
+                  const canAfford = Number(userProfile?.sparks ?? userProfile?.credits ?? 0) >= gift.cost;
+                  return <button key={gift.id} type="button" className={`gift-option ${selectedGift?.id === gift.id ? 'selected' : ''}`} style={{ '--gift-color': gift.color }} disabled={!canAfford || isSendingGift} onClick={() => setSelectedGift(gift)}><span className="gift-icon">{gift.icon}</span><strong>{gift.name}</strong><small>✦ {gift.cost}</small></button>;
+                })}
               </div>
+              {selectedGift && <div className="gift-confirmation"><span>{selectedGift.icon}</span><p>Send a <strong>{selectedGift.name}</strong> to {currentProfile.displayName} for <strong>{selectedGift.cost} sparks</strong>?</p><button type="button" className="btn-primary" onClick={sendGift} disabled={isSendingGift}>{isSendingGift ? 'Sending…' : `Send for ${selectedGift.cost} sparks`}</button></div>}
+            </div>
+          </div>
+        </div>
+      )}
+      {showMeetupModal && (
+        <div className="modal-overlay" onClick={() => !isSendingMeetup && setShowMeetupModal(false)}>
+          <div className="meetup-modal animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="edit-modal-header"><div><h3>Meet {currentProfile.displayName}</h3><span>Send a meetup request · 100 sparks</span></div><button type="button" className="gift-close" onClick={() => setShowMeetupModal(false)} disabled={isSendingMeetup}><X size={18} /></button></div>
+            <div className="meetup-modal-body">
+              {(currentProfile.meetupLocation || currentProfile.meetupRate || currentProfile.meetupNotes) && <div className="meetup-preferences"><strong>{currentProfile.displayName}'s meetup preferences</strong>{currentProfile.meetupLocation && <span>📍 {currentProfile.meetupLocation}</span>}{currentProfile.meetupRate && <span>✦ {currentProfile.meetupRate}</span>}{currentProfile.meetupNotes && <span>{currentProfile.meetupNotes}</span>}</div>}
+              <label>Date and time<input type="datetime-local" value={meetupDate} min={new Date().toISOString().slice(0, 16)} onChange={(e) => setMeetupDate(e.target.value)} /></label>
+              <label>Personal message (optional)<textarea value={meetupNote} maxLength="280" placeholder="Suggest something they would enjoy…" onChange={(e) => setMeetupNote(e.target.value)} /></label>
+              <button type="button" className="btn-primary" onClick={sendMeetup} disabled={isSendingMeetup}>{isSendingMeetup ? 'Sending…' : 'Send meetup request · 100 sparks'}</button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function ProfileSection({ icon: Icon, title, children }) {
+  return (
+    <section className="profile-detail-section">
+      <h3><Icon size={16} /> {title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function ProfileChips({ values = [], accent = false }) {
+  return <div className="profile-detail-chips">{[...new Set(values.filter(Boolean))].map((value) => <span className={accent ? 'accent' : ''} key={value}>{value}</span>)}</div>;
+}
+
+function ProfileFieldList({ icon, title, profile, fields }) {
+  const rows = fields
+    .map(([label, key, format]) => [label, format ? format(profile[key]) : profile[key]])
+    .filter(([, value]) => value !== undefined && value !== null && value !== '');
+  if (!rows.length) return null;
+  return <ProfileSection icon={icon} title={title}><dl className="profile-detail-rows">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{String(value)}</dd></div>)}</dl></ProfileSection>;
+}
+
+function ProfilePrompts({ profile }) {
+  const prompts = [
+    ['My perfect date', profile.promptPerfectDate], ['You will fall for me if', profile.promptFallForYou], ['My green flag', profile.promptGreenFlag], ['Two truths and a lie', profile.promptTwoTruths],
+  ].filter(([, value]) => value);
+  if (!prompts.length) return null;
+  return <ProfileSection icon={MessageCircle} title="Conversation starters"><div className="profile-prompts">{prompts.map(([label, value]) => <article key={label}><strong>{label}</strong><p>{value}</p></article>)}</div></ProfileSection>;
+}
+
+function ProfileFacts({ profile }) {
+  const facts = [
+    [Ruler, 'Height', profile.height],
+    [UserRound, 'Gender', profile.gender],
+  ].filter(([, , value]) => value !== undefined && value !== null && value !== '');
+  if (!facts.length) return null;
+  return <ProfileSection icon={Info} title="Quick facts"><dl className="profile-detail-facts">{facts.map(([Icon, label, value]) => <div key={label}><Icon size={16} /><dt>{label}</dt><dd>{String(value)}</dd></div>)}</dl></ProfileSection>;
 }
 
 const CATEGORY_KEYWORDS = {
