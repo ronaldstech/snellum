@@ -15,6 +15,7 @@ import {
   collection,
   getDocs,
   query,
+  where,
   limit,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -140,11 +141,13 @@ export const profileService = {
   },
 
   // Fetch real users from Firestore collection 'users' for Discovery Match
-  async getDiscoveryUsers(currentUserId, count = 20) {
+  async getDiscoveryUsers(currentUserId, count = 20, category) {
     if (!db) return [];
     try {
       const usersRef = collection(db, 'users');
-      const q = query(usersRef, limit(count));
+      const q = category
+        ? query(usersRef, where('lookingFor', 'array-contains', category), limit(count))
+        : query(usersRef, limit(count));
       const querySnapshot = await getDocs(q);
 
       const users = [];

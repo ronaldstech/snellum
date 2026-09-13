@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Heart,
   X,
@@ -20,7 +20,7 @@ import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/authService';
 import '../../styles/swipe.css';
 
-export default function SwipeView() {
+export default function SwipeView({ categoryFilter }) {
   const { user, userProfile, showToast } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -45,7 +45,7 @@ export default function SwipeView() {
     async function loadFeed() {
       try {
         if (user?.uid) {
-          const firestoreUsers = await profileService.getDiscoveryUsers(user.uid, 30);
+          const firestoreUsers = await profileService.getDiscoveryUsers(user.uid, 30, categoryFilter);
           if (firestoreUsers && firestoreUsers.length > 0) {
             setProfiles(firestoreUsers);
           } else {
@@ -62,7 +62,7 @@ export default function SwipeView() {
       }
     }
     loadFeed();
-  }, [user]);
+  }, [user, categoryFilter]);
 
   // Reset photo carousel index when active profile changes
   useEffect(() => {
@@ -70,8 +70,19 @@ export default function SwipeView() {
     setDragOffset({ x: 0, y: 0 });
   }, [currentIndex]);
 
-  const currentProfile = profiles[currentIndex];
-  const nextProfile = profiles[currentIndex + 1];
+  // A category change is a new deck, so restart from its first profile.
+  useEffect(() => {
+    setCurrentIndex(0);
+    setSwipeHistory([]);
+  }, [categoryFilter]);
+
+  const visibleProfiles = useMemo(
+    () => profiles.filter((profile) => profileMatchesCategory(profile, categoryFilter)),
+    [profiles, categoryFilter],
+  );
+
+  const currentProfile = visibleProfiles[currentIndex];
+  const nextProfile = visibleProfiles[currentIndex + 1];
 
   // Photos array
   const currentPhotos = (currentProfile?.photos && currentProfile.photos.length > 0)
@@ -585,6 +596,52 @@ export default function SwipeView() {
   );
 }
 
+const CATEGORY_KEYWORDS = {
+  Marriage: ['marriage', 'serious', 'life partner'],
+  'Long Term Relationship': ['long term', 'serious partner', 'romantic'],
+  'Short Term Relationship': ['short term relationship', 'something in between'],
+  'Short Term Fun': ['short term fun', 'no strings', 'casual'],
+  Coffee: ['coffee', 'chill', 'casual'],
+  Hookups: ['hookup', 'spontaneous', 'no strings'],
+  'New Friends': ['new friends', 'friends', 'activity buddies'],
+  Sponsor: ['sponsor', 'travel the world', 'explore together'],
+  'Learn Cultures': ['culture', 'global', 'international'],
+  'Figuring Out': ['figuring out', 'open to anything', 'no pressure'],
+};
+
+function profileMatchesCategory(profile, categoryFilter) {
+  if (!categoryFilter) return true;
+
+  const categoryValues = [
+    profile.datingIntent,
+    profile.category,
+    profile.intent,
+    profile.relationshipStatus,
+    ...(Array.isArray(profile.lookingFor) ? profile.lookingFor : [profile.lookingFor]),
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).trim().toLowerCase());
+
+  // Firestore category values use the same exact keys as the Explore list.
+  // Only fall back to legacy free-text matching when a profile has no category.
+  if (categoryValues.length > 0) {
+    return categoryValues.includes(categoryFilter.toLowerCase());
+  }
+
+  const searchableProfileData = [
+    ...categoryValues,
+    profile.bio,
+    ...(profile.tags || []),
+    ...(profile.hobbies || []),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (CATEGORY_KEYWORDS[categoryFilter] || [categoryFilter.toLowerCase()])
+    .some((keyword) => searchableProfileData.includes(keyword));
+}
+
 const DEFAULT_FALLBACK_PROFILES = [
   {
     uid: 'm1',
@@ -599,6 +656,7 @@ const DEFAULT_FALLBACK_PROFILES = [
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
     ],
     tags: ['Art & Design', 'Coffee', 'Travel', 'Music'],
+    datingIntent: 'Coffee',
     matchRate: '98%',
     isVerified: true,
   },
@@ -614,6 +672,7 @@ const DEFAULT_FALLBACK_PROFILES = [
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
     ],
     tags: ['Tech', 'Music', 'Hiking', 'Photography'],
+    datingIntent: 'Long Term Relationship',
     matchRate: '95%',
     isVerified: true,
   },
@@ -629,6 +688,7 @@ const DEFAULT_FALLBACK_PROFILES = [
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80',
     ],
     tags: ['Cooking', 'Foodie', 'Fitness', 'Cinema'],
+    datingIntent: 'Marriage',
     matchRate: '91%',
     isVerified: true,
   },

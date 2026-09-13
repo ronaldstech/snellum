@@ -22,6 +22,10 @@ export class UserProfile {
     this.isPremium = data.isPremium === true;
     this.occupation = data.occupation || '';
     this.relationshipStatus = data.relationshipStatus || '';
+    this.datingIntent = data.datingIntent || data.category || data.intent || '';
+    this.lookingFor = Array.isArray(data.lookingFor)
+      ? data.lookingFor
+      : (data.lookingFor ? [data.lookingFor] : []);
     this.hobbies = Array.isArray(data.hobbies) ? data.hobbies : [];
     this.tags = data.tags || (this.hobbies.length ? this.hobbies : ['Dating', 'Music', 'Travel']);
     this.matchRate = data.matchRate || '96%';
@@ -70,6 +74,8 @@ export class UserProfile {
       credits: this.sparks,
       isPremium: this.isPremium,
       occupation: this.occupation,
+      datingIntent: this.datingIntent,
+      lookingFor: this.lookingFor,
       hobbies: this.hobbies,
     };
   }

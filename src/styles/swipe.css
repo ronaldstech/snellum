@@ -215,6 +215,24 @@
   color: #8B5CF6;
 }
 
+/* On phones the boost message needs its own space instead of sitting over the
+   sticky dashboard header. The deck height accounts for the header, banner,
+   controls, and fixed bottom navigation. */
+@media (max-width: 600px) {
+  .swipe-container {
+    padding-top: 2.75rem;
+  }
+
+  .boost-floating-popup {
+    top: 0.25rem;
+  }
+
+  .card-stack-wrap {
+    height: clamp(300px, calc(100dvh - 265px), 540px);
+    min-height: 0;
+  }
+}
+
 /* Profile Detail Sheet Modal */
 .detail-sheet-modal {
   position: fixed;

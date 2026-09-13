@@ -1050,12 +1050,21 @@ button.settings-tile:hover {
   cursor: pointer;
 }
 
+/* Keep secondary header controls out of phone and tablet layouts. */
+@media (max-width: 768px) {
+  .btn-sparks-badge,
+  .dashboard-settings-button,
+  .theme-toggle-btn {
+    display: none;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .dashboard-header-inner {
     padding: 0.6rem 0.85rem;
   }
-  
+
   .dashboard-nav-tabs {
     display: none;
   }
@@ -1065,8 +1074,10 @@ button.settings-tile:hover {
   }
 
   .dashboard-main {
+    /* Keep scrollable content clear of the fixed mobile navigation. */
     padding: 0.75rem 0.75rem calc(5.5rem + env(safe-area-inset-bottom));
     max-width: 100%;
+    justify-content: flex-start;
   }
 
   .match-card {
@@ -1085,6 +1096,7 @@ button.settings-tile:hover {
 
   .mobile-bottom-nav {
     display: flex;
+    position: fixed;
     padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));
   }
 

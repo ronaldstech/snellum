@@ -177,7 +177,7 @@ export default function MatchDashboardPreview() {
             <button
               type="button"
               onClick={() => setShowSettings(true)}
-              className="btn-ghost"
+              className="btn-ghost dashboard-settings-button"
               style={{ padding: '0.4rem 0.55rem' }}
               title="Settings"
             >
