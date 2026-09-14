@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Flame,
   Compass,
@@ -10,11 +10,11 @@ import {
   Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { chatService } from '../../services/chatService';
 import SwipeView from '../swipe/SwipeView';
 import ExploreScreen from '../explore/ExploreScreen';
 import LikesScreen from '../likes/LikesScreen';
-import ChatList from '../chat/ChatList';
-import ChatWindow from '../chat/ChatWindow';
+import MessagesPage from '../chat/MessagesPage';
 import ProfileScreen from '../profile/ProfileScreen';
 import PremiumStoreModal from '../premium/PremiumStoreModal';
 import NotificationDrawer from '../notifications/NotificationDrawer';
@@ -23,7 +23,7 @@ import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/dashboard.css';
 
 export default function MatchDashboardPreview() {
-  const { user, userProfile, logout, showToast } = useAuth();
+  const { user, userProfile } = useAuth();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | profile
@@ -34,17 +34,28 @@ export default function MatchDashboardPreview() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const handleStartChatWithPartner = (partner) => {
-    setSelectedChat({
-      id: `chat_${partner.uid || Date.now()}`,
-      participantDetails: {
-        [user?.uid || 'me']: { name: 'You' },
-        [partner.uid]: {
-          name: partner.firstName || partner.name || 'Member',
-          avatar: partner.photo || partner.avatar || '',
-        },
-      },
-    });
+  const handleStartChatWithPartner = async (partner) => {
+    const myUid = user?.uid;
+    if (!myUid || !partner?.uid) return;
+    try {
+      const chatId = await chatService.getOrCreateChat(myUid, partner);
+      if (chatId) {
+        const photo = partner.photo || partner.avatar || partner.photos?.[0] || '';
+        setSelectedChat({
+          id: chatId,
+          otherUid: partner.uid,
+          participantDetails: {
+            [myUid]: { name: 'You' },
+            [partner.uid]: {
+              name: partner.firstName || partner.name || 'Member',
+              avatar: photo,
+            },
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to open chat:', e);
+    }
     setActiveTab('messages');
   };
 
@@ -201,19 +212,17 @@ export default function MatchDashboardPreview() {
         )}
 
         {activeTab === 'messages' && (
-          selectedChat ? (
-            <ChatWindow
-              chat={selectedChat}
-              currentUser={user || { uid: 'guest' }}
-              onBack={() => setSelectedChat(null)}
-            />
-          ) : (
-            <ChatList
-              currentUserId={user?.uid}
-              onSelectChat={(c) => setSelectedChat(c)}
-              onNavigateToDiscover={() => setActiveTab('discover')}
-            />
-          )
+          <MessagesPage
+            currentUserId={user?.uid}
+            onNavigateToDiscover={() => {
+              setActiveTab('discover');
+              setSelectedChat(null);
+            }}
+            onStartMatch={handleStartChatWithPartner}
+            pendingChat={selectedChat}
+            onConsumePendingChat={() => setSelectedChat(null)}
+            onUpgrade={() => setShowPremiumStore(true)}
+          />
         )}
 
         {activeTab === 'profile' && (

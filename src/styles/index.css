@@ -30,14 +30,19 @@
   --bg-card-solid: #13131C;
   --bg-input: rgba(255, 255, 255, 0.04);
   --bg-input-focus: rgba(255, 255, 255, 0.07);
-  
+
+  --surface: #13131C;
+  --card-hover: rgba(255, 255, 255, 0.06);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --gradient-primary: linear-gradient(135deg, #FF4D85 0%, #FF7597 100%);
+
   --text-main: #FFFFFF;
   --text-muted: #9CA3AF;
   --text-subtle: #6B7280;
-  
+
   --border-light: rgba(255, 255, 255, 0.09);
   --border-focus: #FF4D85;
-  
+
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.55);
@@ -50,14 +55,19 @@
   --bg-card-solid: #FFFFFF;
   --bg-input: rgba(0, 0, 0, 0.035);
   --bg-input-focus: rgba(0, 0, 0, 0.06);
-  
+
+  --surface: #FFFFFF;
+  --card-hover: rgba(0, 0, 0, 0.04);
+  --input-bg: rgba(0, 0, 0, 0.035);
+  --gradient-primary: linear-gradient(135deg, #FF4D85 0%, #FF7597 100%);
+
   --text-main: #111827;
   --text-muted: #6B7280;
   --text-subtle: #9CA3AF;
-  
+
   --border-light: rgba(0, 0, 0, 0.08);
   --border-focus: #FF4D85;
-  
+
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.08);

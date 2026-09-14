@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Heart, Lock, Sparkles, MessageCircle, Star, ShieldCheck, Flame } from 'lucide-react';
+import { useState } from 'react';
+import { Heart, Lock, Sparkles, MessageCircle, Flame, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/likes.css';
 
@@ -74,6 +74,48 @@ export default function LikesScreen({ onOpenPremium, onStartChat }) {
           </button>
         )}
       </div>
+
+      {/* New Likes strip — Flutter likes-screen rail parity */}
+      {likesList.length > 0 && (
+        <div className="likes-new-strip animate-fade-in">
+          <div className="likes-new-strip-header">
+            <div className="likes-new-strip-title">
+              <Flame size={15} />
+              <h3>New Likes</h3>
+            </div>
+            <button
+              type="button"
+              className="likes-strip-view-all"
+              onClick={onOpenPremium}
+              aria-label="View all likes"
+            >
+              View all <ChevronRight size={14} />
+            </button>
+          </div>
+
+          <div className="likes-new-strip-scroll">
+            {likesList.slice(0, 6).map((item) => (
+              <button
+                key={item.uid}
+                type="button"
+                className={`new-like-avatar-btn ${!isPremium ? 'locked' : ''}`}
+                onClick={() => !isPremium && onOpenPremium && onOpenPremium()}
+                aria-label={`${item.firstName}, ${item.age}`}
+              >
+                <span className="new-like-avatar-ring">
+                  <img src={item.photo} alt={item.firstName} />
+                  {!isPremium && (
+                    <span className="new-like-avatar-lock">
+                      <Lock size={10} />
+                    </span>
+                  )}
+                </span>
+                <span className="new-like-avatar-name">{item.firstName}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Grid of Admirers */}
       <div className="likes-grid">
