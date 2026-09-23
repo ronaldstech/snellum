@@ -130,6 +130,14 @@
   justify-content: center;
 }
 
+/* Give Messages view full breathing room across desktop margins */
+.dashboard-main.tab-messages {
+  max-width: 1440px;
+  padding: 1rem clamp(0.75rem, 1.8vw, 1.75rem) 1.25rem;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
 /* Match Discovery Card */
 .match-card {
   width: 100%;

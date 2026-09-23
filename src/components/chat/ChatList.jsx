@@ -22,7 +22,7 @@ function isOnlineFresh(profile) {
   return profile.isOnline === true;
 }
 
-export default function ChatList({ currentUserId, onSelectChat, onNavigateToDiscover, onStartMatch }) {
+export default function ChatList({ currentUserId, selectedChatId, onSelectChat, onNavigateToDiscover, onStartMatch }) {
   const [conversations, setConversations] = useState([]);
   const [matches, setMatches] = useState(() =>
     isFirebaseConfigured && db ? [] : DEMO_MATCHES
@@ -196,10 +196,12 @@ export default function ChatList({ currentUserId, onSelectChat, onNavigateToDisc
             const sentByMe = chat.lastMessageSenderId === currentUserId;
             const preview = chat.lastMessage || 'Say hi! 👋';
 
+            const isSelected = selectedChatId && selectedChatId === chat.id;
+
             return (
               <div
                 key={chat.id}
-                className={`chat-list-item ${unread > 0 ? 'has-unread' : ''} ${chat.isSuperRequest ? 'super-chat' : ''}`}
+                className={`chat-list-item ${isSelected ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''} ${chat.isSuperRequest ? 'super-chat' : ''}`}
                 onClick={() => onSelectChat(chat)}
               >
                 <div className="chat-avatar-wrapper">

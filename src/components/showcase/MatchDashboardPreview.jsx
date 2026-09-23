@@ -199,7 +199,7 @@ export default function MatchDashboardPreview() {
       </header>
 
       {/* Main Content Area */}
-      <main className="dashboard-main">
+      <main className={`dashboard-main tab-${activeTab}`}>
         {activeTab === 'discover' && <SwipeView />}
 
         {activeTab === 'explore' && <ExploreScreen />}

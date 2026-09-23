@@ -42,6 +42,7 @@ export default function MessagesPage({
     <div className={`messages-page-layout ${selectedChat ? 'has-chat' : ''}`}>
       <ChatList
         currentUserId={currentUserId}
+        selectedChatId={selectedChat?.id}
         onSelectChat={setSelectedChat}
         onNavigateToDiscover={onNavigateToDiscover}
         onStartMatch={onStartMatch}
