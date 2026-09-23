@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
 import SwipeView from '../swipe/SwipeView';
+import DiscoveryFiltersSidebar from '../swipe/DiscoveryFiltersSidebar';
 import ExploreScreen from '../explore/ExploreScreen';
 import LikesScreen from '../likes/LikesScreen';
 import MessagesPage from '../chat/MessagesPage';
@@ -60,7 +61,7 @@ export default function MatchDashboardPreview() {
   };
 
   return (
-    <div className="dashboard-layout">
+    <div className={`dashboard-layout ${activeTab === 'discover' ? 'tab-discover-active' : ''}`}>
       {/* Top Navbar */}
       <header className="dashboard-header">
         <div className="dashboard-header-inner">
@@ -200,7 +201,14 @@ export default function MatchDashboardPreview() {
 
       {/* Main Content Area */}
       <main className={`dashboard-main tab-${activeTab}`}>
-        {activeTab === 'discover' && <SwipeView />}
+        {activeTab === 'discover' && (
+          <div className="discover-shell">
+            <DiscoveryFiltersSidebar onOpenPremium={() => setShowPremiumStore(true)} />
+            <div className="discover-main">
+              <SwipeView onOpenPremium={() => setShowPremiumStore(true)} />
+            </div>
+          </div>
+        )}
 
         {activeTab === 'explore' && <ExploreScreen />}
 

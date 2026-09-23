@@ -9,6 +9,60 @@
   align-items: center;
 }
 
+/* Discovery Filters Toggle Button */
+.swipe-filter-button {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 22;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(10, 14, 24, 0.55);
+  color: #FFFFFF;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.swipe-filter-button:hover:not(:disabled) { transform: scale(1.08); }
+.swipe-filter-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+.swipe-filter-button.has-filters {
+  color: var(--primary);
+  border-color: rgba(255, 77, 133, 0.6);
+  box-shadow: 0 5px 15px rgba(255, 77, 133, 0.28);
+}
+
+.swipe-filter-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--primary-gradient);
+  color: #FFFFFF;
+  font-size: 0.62rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(255, 77, 133, 0.5);
+}
+
+/* The always-visible sidebar replaces the floating toggle on wide screens. */
+@media (min-width: 769px) {
+  .swipe-filter-button {
+    display: none;
+  }
+}
+
 /* Floating Boost Banner Popup */
 .boost-floating-popup {
   position: absolute;
@@ -70,8 +124,8 @@
 /* Card Stack */
 .card-stack-wrap {
   width: 100%;
-  height: min(540px, calc(100dvh - 170px));
-  min-height: 400px;
+  height: min(495px, calc(100dvh - 200px));
+  min-height: 380px;
   position: relative;
   perspective: 1000px;
   user-select: none;
@@ -328,12 +382,17 @@
   }
 
   .card-stack-wrap {
-    height: clamp(300px, calc(100dvh - 265px), 540px);
+    height: clamp(300px, calc(100dvh - 285px), 495px);
     min-height: 0;
   }
 
   .swipe-container.has-boost-prompt .card-stack-wrap {
-    height: clamp(300px, calc(100dvh - 311px), 540px);
+    height: clamp(300px, calc(100dvh - 331px), 495px);
+  }
+
+  /* Keep the filter button clear of the boost strip on phones. */
+  .swipe-container.has-boost-prompt .swipe-filter-button {
+    top: 52px;
   }
 }
 

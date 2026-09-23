@@ -140,6 +140,17 @@ export const profileService = {
     return null;
   },
 
+  // Persist discovery filters onto the user's profile doc (matches Flutter updateFilters)
+  async updateDiscoveryFilters(uid, filters) {
+    if (!db || !uid) return false;
+    const docRef = doc(db, 'users', uid);
+    await updateDoc(docRef, {
+      ...filters,
+      lastUpdated: serverTimestamp(),
+    });
+    return true;
+  },
+
   // Fetch real users from Firestore collection 'users' for Discovery Match
   async getDiscoveryUsers(currentUserId, count = 20, category) {
     if (!db) return [];

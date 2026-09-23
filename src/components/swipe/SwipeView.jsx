@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarPlus,
+  SlidersHorizontal,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../../context/AuthContext';
@@ -26,14 +27,16 @@ import { giftService, GIFT_CATALOG } from '../../services/giftService';
 import { meetupService } from '../../services/meetupService';
 import { swipeService } from '../../services/swipeService';
 import { isFirebaseConfigured } from '../../services/firebase';
+import DiscoveryFiltersModal from './DiscoveryFiltersModal';
 import '../../styles/swipe.css';
 
-export default function SwipeView({ categoryFilter }) {
+export default function SwipeView({ categoryFilter, onOpenPremium }) {
   const { user, userProfile, showToast, spendSparks } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Swipe gesture & stamp feedback state
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -103,9 +106,11 @@ export default function SwipeView({ categoryFilter }) {
   }, [categoryFilter]);
 
   const visibleProfiles = useMemo(
-    () => profiles.filter((profile) => profileMatchesCategory(profile, categoryFilter)),
-    [profiles, categoryFilter],
+    () => applyProfileFilters(userProfile, profiles.filter((profile) => profileMatchesCategory(profile, categoryFilter))),
+    [profiles, categoryFilter, userProfile],
   );
+
+  const activeFilterCount = useMemo(() => countActiveFilters(userProfile), [userProfile]);
 
   const currentProfile = visibleProfiles[currentIndex];
   const nextProfile = visibleProfiles[currentIndex + 1];
@@ -333,6 +338,21 @@ export default function SwipeView({ categoryFilter }) {
 
   return (
     <div className={`swipe-container animate-fade-in ${showBoostPrompt ? 'has-boost-prompt' : ''}`}>
+      <button
+        type="button"
+        className={`swipe-filter-button ${activeFilterCount > 0 ? 'has-filters' : ''}`}
+        onClick={() => setShowFilters(true)}
+        title="Discovery filters"
+        aria-label="Open discovery filters"
+      >
+        <SlidersHorizontal size={17} />
+        {activeFilterCount > 0 && <span className="swipe-filter-count">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>}
+      </button>
+
+      {showFilters && (
+        <DiscoveryFiltersModal onClose={() => setShowFilters(false)} onOpenPremium={onOpenPremium} />
+      )}
+
       {showBoostPrompt && (
         <div className="boost-floating-popup" role="status">
           <button type="button" className="boost-message" onClick={() => { setShowBoostPrompt(false); showToast('Boost is coming soon — your profile is already looking great!', 'info'); }}>
@@ -798,6 +818,165 @@ function profileMatchesCategory(profile, categoryFilter) {
 
   return (CATEGORY_KEYWORDS[categoryFilter] || [categoryFilter.toLowerCase()])
     .some((keyword) => searchableProfileData.includes(keyword));
+}
+
+const DEFAULT_FILTERS = {
+  filterGender: 'Everyone',
+  filterMinAge: 18,
+  filterMaxAge: 60,
+  filterMaxDistance: 50,
+  filterAgeStrict: false,
+  filterDistanceStrict: false,
+  filterRelationshipStatus: 'Any',
+  filterReligion: 'Any',
+  filterSmoking: 'Any',
+  filterDrinking: 'Any',
+  filterZodiac: 'Any',
+  filterEducationLevel: 'Any',
+  filterVerifiedOnly: false,
+  filterOnlineOnly: false,
+  filterKids: 'Any',
+  filterPets: 'Any',
+  filterIntrovertExtrovert: 'Any',
+  filterLookingFor: 'Any',
+  filterMaxPhotos: 9,
+  filterHasBio: false,
+  filterFamilyPlans: 'Any',
+  filterCommunicationStyle: 'Any',
+  filterLoveStyle: 'Any',
+  filterCountry: 'Any',
+};
+
+function countActiveFilters(profile) {
+  if (!profile) return 0;
+  let count = 0;
+  Object.keys(DEFAULT_FILTERS).forEach((key) => {
+    const current = profile[key];
+    const defaultValue = DEFAULT_FILTERS[key];
+    if (typeof defaultValue === 'boolean') {
+      if (current === true) count += 1;
+    } else if (current !== undefined && current !== null && current !== defaultValue) {
+      count += 1;
+    }
+  });
+  return count;
+}
+
+function toRadians(degrees) {
+  return (degrees * Math.PI) / 180;
+}
+
+function distanceKm(a, b) {
+  if (a?.latitude != null && a?.longitude != null && b?.latitude != null && b?.longitude != null) {
+    const R = 6371;
+    const dLat = toRadians(b.latitude - a.latitude);
+    const dLon = toRadians(b.longitude - a.longitude);
+    const lat1 = toRadians(a.latitude);
+    const lat2 = toRadians(b.latitude);
+    const haversine = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(haversine));
+  }
+  const match = String(b.location || '').match(/([\d.]+)\s*km/i);
+  return match ? parseFloat(match[1]) : null;
+}
+
+// Mirrors Flutter ProfileService._applyProfileFiltering
+function applyProfileFilters(currentUser, rawProfiles) {
+  if (!currentUser) return rawProfiles;
+
+  const minAge = currentUser.filterMinAge ?? 18;
+  const maxAge = currentUser.filterMaxAge ?? 60;
+  const maxDistance = currentUser.filterMaxDistance ?? 50;
+
+  let filterGender = currentUser.filterGender || 'Everyone';
+
+  const ageStrict = currentUser.filterAgeStrict === true;
+  const distanceStrict = currentUser.filterDistanceStrict === true;
+  const filterRelationshipStatus = currentUser.filterRelationshipStatus || 'Any';
+  const filterReligion = currentUser.filterReligion || 'Any';
+  const filterSmoking = currentUser.filterSmoking || 'Any';
+  const filterDrinking = currentUser.filterDrinking || 'Any';
+  const filterZodiac = currentUser.filterZodiac || 'Any';
+  const filterEducationLevel = currentUser.filterEducationLevel || 'Any';
+  const filterVerifiedOnly = currentUser.isElite === true && currentUser.filterVerifiedOnly === true;
+  const filterOnlineOnly = currentUser.filterOnlineOnly === true;
+  const filterKids = currentUser.filterKids || 'Any';
+  const filterPets = currentUser.filterPets || 'Any';
+  const filterIntrovertExtrovert = currentUser.filterIntrovertExtrovert || 'Any';
+  const filterLookingFor = currentUser.filterLookingFor || 'Any';
+  const filterMaxPhotos = currentUser.filterMaxPhotos ?? 9;
+  const filterHasBio = currentUser.filterHasBio === true;
+  const filterFamilyPlans = currentUser.filterFamilyPlans || 'Any';
+  const filterCommunicationStyle = currentUser.filterCommunicationStyle || 'Any';
+  const filterLoveStyle = currentUser.filterLoveStyle || 'Any';
+  const filterCountry = currentUser.isElite === true ? (currentUser.filterCountry || 'Any') : 'Any';
+
+  const strictProfiles = [];
+  const relaxedProfiles = [];
+
+  rawProfiles.forEach((profile) => {
+    if (profile.hideProfile === true) return;
+
+    // Gender filter (always strict)
+    if (filterGender !== 'Everyone' && filterGender) {
+      const targetGender = filterGender === 'Men' ? 'Male' : filterGender === 'Women' ? 'Female' : filterGender;
+      if (String(profile.gender || '').toLowerCase() !== targetGender.toLowerCase()) return;
+    }
+
+    if (filterRelationshipStatus !== 'Any' && profile.relationshipStatus !== filterRelationshipStatus) return;
+    if (filterReligion !== 'Any' && profile.religion !== filterReligion) return;
+    if (filterSmoking !== 'Any' && profile.smoking !== filterSmoking) return;
+    if (filterDrinking !== 'Any' && profile.drinking !== filterDrinking) return;
+    if (filterZodiac !== 'Any' && profile.zodiac !== filterZodiac) return;
+    if (filterEducationLevel !== 'Any' && profile.educationLevel !== filterEducationLevel) return;
+    if (filterVerifiedOnly && profile.isVerified !== true) return;
+    if (filterOnlineOnly && profile.isOnline !== true) return;
+    if (filterKids !== 'Any' && profile.wantKids !== filterKids) return;
+    if (filterPets !== 'Any' && profile.pets !== filterPets) return;
+    if (filterIntrovertExtrovert !== 'Any' && profile.introvertExtrovert !== filterIntrovertExtrovert) return;
+
+    if (filterLookingFor !== 'Any') {
+      const lookingForValues = [...(Array.isArray(profile.lookingFor) ? profile.lookingFor : [profile.lookingFor]), profile.datingIntent, profile.category, profile.intent].filter(Boolean);
+      if (!lookingForValues.some((v) => String(v).toLowerCase() === filterLookingFor.toLowerCase())) return;
+    }
+
+    if (filterHasBio && !String(profile.bio || '').trim()) return;
+    if (filterMaxPhotos !== 9 && (profile.photos?.length || 0) > filterMaxPhotos) return;
+    if (filterFamilyPlans !== 'Any' && profile.familyPlans !== filterFamilyPlans) return;
+    if (filterCommunicationStyle !== 'Any' && profile.communicationStyle !== filterCommunicationStyle) return;
+    if (filterLoveStyle !== 'Any' && profile.loveStyle !== filterLoveStyle) return;
+
+    if (filterCountry !== 'Any') {
+      const loc = String(profile.location || '').toLowerCase();
+      const cCode = String(profile.countryCode || '').toLowerCase();
+      const target = filterCountry.toLowerCase();
+      if (!(loc.includes(target) || cCode.includes(target) || target.includes(loc))) return;
+    }
+
+    let isStrictMatch = true;
+
+    const age = profile.age;
+    if (age != null && (age < minAge || age > maxAge)) {
+      if (ageStrict) return;
+      isStrictMatch = false;
+    }
+
+    const km = distanceKm(currentUser, profile);
+    if (km != null && km > maxDistance) {
+      if (distanceStrict) return;
+      isStrictMatch = false;
+    }
+
+    if (isStrictMatch) {
+      strictProfiles.push(profile);
+    } else {
+      relaxedProfiles.push(profile);
+    }
+  });
+
+  const sorted = strictProfiles.concat(relaxedProfiles);
+  sorted.sort((a, b) => (a.isBoosted && !b.isBoosted ? -1 : !a.isBoosted && b.isBoosted ? 1 : 0));
+  return sorted;
 }
 
 const DEFAULT_FALLBACK_PROFILES = [

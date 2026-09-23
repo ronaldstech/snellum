@@ -162,6 +162,22 @@ export function AuthProvider({ children }) {
     });
   };
 
+  // Persist discovery filters locally + to Firestore, then refresh the profile object
+  // so the swipe deck re-filters immediately (mirrors Flutter's _swipesVersion bump).
+  const saveDiscoveryFilters = async (filters) => {
+    setUserProfile((current) => (current ? new UserProfile({ ...current, ...filters }) : current));
+    if (user?.uid && isFirebaseConfigured) {
+      try {
+        await profileService.updateDiscoveryFilters(user.uid, filters);
+        return true;
+      } catch (e) {
+        console.error('Error saving discovery filters:', e);
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -174,6 +190,7 @@ export function AuthProvider({ children }) {
         toastMessage,
         showToast,
         spendSparks,
+        saveDiscoveryFilters,
         loginWithEmail,
         signUpWithEmail,
         loginWithGoogle,

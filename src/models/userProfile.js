@@ -20,6 +20,38 @@ export class UserProfile {
     this.isEmailVerified = data.isEmailVerified === true;
     this.sparks = Number(data.credits ?? data.sparks ?? 100);
     this.isPremium = data.isPremium === true;
+    this.subscriptionPlan = data.subscriptionPlan || '';
+    this.isElite = data.isElite === true || data.subscriptionPlan === 'elite';
+    this.isOnline = data.isOnline === true;
+    this.isBoosted = data.isBoosted === true;
+    this.hideProfile = data.hideProfile === true;
+    this.latitude = data.latitude != null && !isNaN(Number(data.latitude)) ? Number(data.latitude) : null;
+    this.longitude = data.longitude != null && !isNaN(Number(data.longitude)) ? Number(data.longitude) : null;
+    this.countryCode = data.countryCode || '';
+    this.filterMinAge = data.filterMinAge != null ? Number(data.filterMinAge) : 18;
+    this.filterMaxAge = data.filterMaxAge != null ? Number(data.filterMaxAge) : 60;
+    this.filterMaxDistance = data.filterMaxDistance != null ? Number(data.filterMaxDistance) : 50;
+    this.filterGender = data.filterGender || 'Everyone';
+    this.filterAgeStrict = data.filterAgeStrict === true;
+    this.filterDistanceStrict = data.filterDistanceStrict === true;
+    this.filterRelationshipStatus = data.filterRelationshipStatus || 'Any';
+    this.filterReligion = data.filterReligion || 'Any';
+    this.filterSmoking = data.filterSmoking || 'Any';
+    this.filterDrinking = data.filterDrinking || 'Any';
+    this.filterZodiac = data.filterZodiac || 'Any';
+    this.filterEducationLevel = data.filterEducationLevel || 'Any';
+    this.filterVerifiedOnly = data.filterVerifiedOnly === true;
+    this.filterOnlineOnly = data.filterOnlineOnly === true;
+    this.filterKids = data.filterKids || 'Any';
+    this.filterPets = data.filterPets || 'Any';
+    this.filterIntrovertExtrovert = data.filterIntrovertExtrovert || 'Any';
+    this.filterLookingFor = data.filterLookingFor || 'Any';
+    this.filterMaxPhotos = data.filterMaxPhotos != null ? Number(data.filterMaxPhotos) : 9;
+    this.filterHasBio = data.filterHasBio === true;
+    this.filterFamilyPlans = data.filterFamilyPlans || 'Any';
+    this.filterCommunicationStyle = data.filterCommunicationStyle || 'Any';
+    this.filterLoveStyle = data.filterLoveStyle || 'Any';
+    this.filterCountry = data.filterCountry || 'Any';
     this.occupation = data.occupation || '';
     this.industry = data.industry || '';
     this.educationLevel = data.educationLevel || '';
@@ -104,6 +136,38 @@ export class UserProfile {
       isEmailVerified: this.isEmailVerified,
       credits: this.sparks,
       isPremium: this.isPremium,
+      subscriptionPlan: this.subscriptionPlan,
+      isElite: this.isElite,
+      isOnline: this.isOnline,
+      isBoosted: this.isBoosted,
+      hideProfile: this.hideProfile,
+      latitude: this.latitude,
+      longitude: this.longitude,
+      countryCode: this.countryCode,
+      filterMinAge: this.filterMinAge,
+      filterMaxAge: this.filterMaxAge,
+      filterMaxDistance: this.filterMaxDistance,
+      filterGender: this.filterGender,
+      filterAgeStrict: this.filterAgeStrict,
+      filterDistanceStrict: this.filterDistanceStrict,
+      filterRelationshipStatus: this.filterRelationshipStatus,
+      filterReligion: this.filterReligion,
+      filterSmoking: this.filterSmoking,
+      filterDrinking: this.filterDrinking,
+      filterZodiac: this.filterZodiac,
+      filterEducationLevel: this.filterEducationLevel,
+      filterVerifiedOnly: this.filterVerifiedOnly,
+      filterOnlineOnly: this.filterOnlineOnly,
+      filterKids: this.filterKids,
+      filterPets: this.filterPets,
+      filterIntrovertExtrovert: this.filterIntrovertExtrovert,
+      filterLookingFor: this.filterLookingFor,
+      filterMaxPhotos: this.filterMaxPhotos,
+      filterHasBio: this.filterHasBio,
+      filterFamilyPlans: this.filterFamilyPlans,
+      filterCommunicationStyle: this.filterCommunicationStyle,
+      filterLoveStyle: this.filterLoveStyle,
+      filterCountry: this.filterCountry,
       occupation: this.occupation,
       industry: this.industry,
       educationLevel: this.educationLevel,
