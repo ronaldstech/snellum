@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
 import SwipeView from '../swipe/SwipeView';
 import DiscoveryFiltersSidebar from '../swipe/DiscoveryFiltersSidebar';
+import ProfileSidebar from '../profile/ProfileSidebar';
 import ExploreScreen from '../explore/ExploreScreen';
 import LikesScreen from '../likes/LikesScreen';
 import MessagesPage from '../chat/MessagesPage';
@@ -34,6 +35,7 @@ export default function MatchDashboardPreview() {
   const [showPremiumStore, setShowPremiumStore] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleStartChatWithPartner = async (partner) => {
     const myUid = user?.uid;
@@ -156,17 +158,14 @@ export default function MatchDashboardPreview() {
 
             <ThemeToggle />
 
-            {/* Profile Avatar Pill */}
+            {/* Profile Avatar Pill → Profile Sidebar Drawer */}
             <div
               className="user-pill"
-              onClick={() => {
-                setActiveTab('profile');
-                setSelectedChat(null);
-              }}
+              onClick={() => setShowProfile(true)}
               style={{
                 cursor: 'pointer',
                 border:
-                  activeTab === 'profile'
+                  activeTab === 'profile' || showProfile
                     ? '1px solid var(--primary)'
                     : '1px solid var(--border-light)',
               }}
@@ -236,6 +235,7 @@ export default function MatchDashboardPreview() {
         {activeTab === 'profile' && (
           <ProfileScreen
             onNavigateToDiscover={() => setActiveTab('discover')}
+            onOpenPremium={() => setShowPremiumStore(true)}
           />
         )}
       </main>
@@ -318,6 +318,12 @@ export default function MatchDashboardPreview() {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+      />
+
+      <ProfileSidebar
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+        onOpenPremium={() => setShowPremiumStore(true)}
       />
     </div>
   );

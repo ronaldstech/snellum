@@ -25,6 +25,11 @@ export class UserProfile {
     this.isOnline = data.isOnline === true;
     this.isBoosted = data.isBoosted === true;
     this.hideProfile = data.hideProfile === true;
+    this.premiumExpiry = data.premiumExpiry || null;
+    this.premiumPurchasedAt = data.premiumPurchasedAt || null;
+    this.isPlanMonthly = data.isPlanMonthly != null ? data.isPlanMonthly === true : null;
+    this.queuedSubscriptions = Array.isArray(data.queuedSubscriptions) ? data.queuedSubscriptions : [];
+    this.boostExpiry = data.boostExpiry || null;
     this.latitude = data.latitude != null && !isNaN(Number(data.latitude)) ? Number(data.latitude) : null;
     this.longitude = data.longitude != null && !isNaN(Number(data.longitude)) ? Number(data.longitude) : null;
     this.countryCode = data.countryCode || '';
@@ -141,6 +146,11 @@ export class UserProfile {
       isOnline: this.isOnline,
       isBoosted: this.isBoosted,
       hideProfile: this.hideProfile,
+      premiumExpiry: this.premiumExpiry,
+      premiumPurchasedAt: this.premiumPurchasedAt,
+      isPlanMonthly: this.isPlanMonthly,
+      queuedSubscriptions: this.queuedSubscriptions,
+      boostExpiry: this.boostExpiry,
       latitude: this.latitude,
       longitude: this.longitude,
       countryCode: this.countryCode,

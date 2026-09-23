@@ -161,6 +161,551 @@
   color: var(--text-muted);
 }
 
+/* Enhanced Profile Panel (mirrors profile_screen.dart) */
+.profile-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Profile drawer (same pattern as the settings drawer) */
+.profile-drawer {
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card-solid);
+  border-left: 1px solid var(--border-light);
+  box-shadow: var(--shadow-lg);
+  animation: profile-slide-in 0.28s ease;
+}
+
+@keyframes profile-slide-in {
+  from { transform: translateX(80px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.profile-drawer-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  background: linear-gradient(135deg, rgba(255, 77, 133, 0.09), transparent 62%);
+}
+
+.profile-drawer-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 77, 133, 0.12);
+  color: var(--primary);
+}
+
+.profile-drawer-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem 1.1rem 1.5rem;
+  background: var(--bg-main);
+}
+
+/* 1. Profile header: gradient-ring avatar + edit badge */
+.pp-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.55rem;
+  padding: 0.25rem 0 0.5rem;
+  cursor: pointer;
+}
+
+.pp-avatar-ring {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  padding: 4px;
+  border-radius: 50%;
+  background: conic-gradient(#FF4D85, #FF8DAF, #FF2A6D, #FF4D85);
+  box-shadow: 0 8px 24px rgba(255, 77, 133, 0.32);
+}
+
+.pp-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg-main);
+  background: var(--bg-input);
+}
+
+.pp-edit-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF4D85, #FF6584);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--bg-main);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+.pp-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.pp-verified { color: #2196F3; flex: 0 0 auto; }
+
+.pp-email,
+.pp-occupation {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.pp-premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #FFD700, #FF9E00);
+  color: #000000;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  box-shadow: 0 4px 10px rgba(255, 158, 0, 0.3);
+}
+
+/* 2. Subscription status card */
+.pp-sub-card {
+  --pp-accent: #FFB300;
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  background: var(--bg-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.pp-sub-card.pp-sub-active {
+  border-color: color-mix(in srgb, var(--pp-accent) 35%, transparent);
+}
+
+.pp-sub-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1rem 0.85rem;
+}
+
+.pp-sub-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  background: var(--pp-accent);
+  flex: 0 0 auto;
+}
+
+.pp-sub-active .pp-sub-icon {
+  background: linear-gradient(135deg, var(--pp-accent), color-mix(in srgb, var(--pp-accent) 70%, #FFFFFF));
+}
+
+.pp-sub-info { min-width: 0; }
+
+.pp-sub-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pp-sub-title {
+  font-size: 13.5px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: var(--text-main);
+}
+
+.pp-sub-status {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.14);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pp-sub-status.active {
+  color: #00C853;
+  background: rgba(0, 200, 83, 0.12);
+}
+
+.pp-sub-status.expired {
+  color: #FF5252;
+  background: rgba(255, 82, 82, 0.12);
+}
+
+.pp-sub-detail {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.pp-sub-progress { padding: 0 1rem 0.85rem; }
+
+.pp-progress-track {
+  height: 5px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--pp-accent) 15%, transparent);
+  overflow: hidden;
+}
+
+.pp-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--pp-accent);
+}
+
+.pp-sub-dates {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--bg-input);
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+}
+
+.pp-sub-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.pp-sub-date-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pp-sub-date-row b {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.pp-queued {
+  padding: 0.6rem 1rem;
+  border-top: 1px dashed var(--border-light);
+}
+
+.pp-queued-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.pp-queued-head span {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #29B6F6;
+}
+
+.pp-queued-head small {
+  font-size: 9.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pp-queued-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  margin-bottom: 0.35rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+}
+
+.pp-queued-item-info { min-width: 0; }
+
+.pp-queued-item-info b {
+  display: block;
+  font-size: 11px;
+  color: var(--text-main);
+}
+
+.pp-queued-item-info small {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.pp-queued-activate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FF4D85, #FF8DA1);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(255, 77, 133, 0.3);
+}
+
+.pp-sub-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  border: none;
+  border-top: 1px solid var(--border-light);
+  background: color-mix(in srgb, var(--pp-accent) 10%, transparent);
+  color: var(--pp-accent);
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.pp-sub-cta:hover {
+  background: color-mix(in srgb, var(--pp-accent) 16%, transparent);
+}
+
+/* 3. Completion card */
+.pp-complete-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #FF4D85, #FF7597);
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(255, 77, 133, 0.25);
+  transition: var(--transition-smooth);
+}
+
+.pp-complete-card.complete {
+  background: linear-gradient(135deg, #2E7D32, #4CAF50);
+  box-shadow: 0 10px 20px rgba(46, 125, 50, 0.22);
+}
+
+.pp-complete-ring {
+  --pct: 0;
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(#FFFFFF calc(var(--pct) * 1%), rgba(255, 255, 255, 0.28) 0);
+  flex: 0 0 auto;
+}
+
+.pp-complete-ring::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: #FF5A8D;
+}
+
+.pp-complete-card.complete .pp-complete-ring::after { background: #3E9445; }
+
+.pp-complete-ring span {
+  position: relative;
+  z-index: 1;
+  color: #FFFFFF;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.pp-complete-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pp-complete-copy b {
+  font-size: 14px;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.pp-complete-copy span {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.3;
+}
+
+.pp-complete-card > svg {
+  color: rgba(255, 255, 255, 0.9);
+  flex: 0 0 auto;
+}
+
+/* 4. Stats grid (Likes / Views / Sparks) */
+.pp-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.pp-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.9rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-align: center;
+}
+
+.pp-stat-card:hover { border-color: var(--primary); }
+
+.pp-stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pp-stat-card b {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.pp-stat-card small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pp-stat-wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.9rem;
+  text-align: left;
+}
+
+.pp-stat-wide-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pp-stat-wide-copy b { font-size: 1.3rem; }
+
+.pp-stat-arrow { color: var(--text-subtle); flex: 0 0 auto; }
+
+/* 5. Quick actions menu */
+.pp-menu {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 0.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pp-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.6rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 14px;
+  text-align: left;
+  transition: var(--transition-smooth);
+}
+
+.pp-menu-item:hover { background: var(--bg-input); }
+
+.pp-menu-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.pp-menu-copy { flex: 1; min-width: 0; }
+
+.pp-menu-copy b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.pp-menu-copy small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pp-menu-boosted small { color: #FF9E00; }
+
+.pp-menu-arrow { color: var(--text-subtle); flex: 0 0 auto; }
+
+.pp-menu-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0.15rem 0.9rem;
+}
+
 /* Modal Edit Profile Styling */
 .modal-overlay {
   position: fixed;
