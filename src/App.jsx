@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
+import LandingPage from './components/landing/LandingPage';
 import SignInForm from './components/auth/SignInForm';
 import SignUpForm from './components/auth/SignUpForm';
 import PhoneAuthForm from './components/auth/PhoneAuthForm';
@@ -8,13 +9,14 @@ import EmailVerificationView from './components/auth/EmailVerificationView';
 import ForgotPasswordModal from './components/auth/ForgotPasswordModal';
 import MatchDashboardPreview from './components/showcase/MatchDashboardPreview';
 import ThemeToggle from './components/common/ThemeToggle';
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, ArrowLeft } from 'lucide-react';
 import './styles/auth.css';
 
 export default function App() {
-  const { currentScreen, toastMessage } = useAuth();
+  const { currentScreen, setCurrentScreen, toastMessage } = useAuth();
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
+  // 1. Authenticated User Dashboard
   if (currentScreen === 'authenticated') {
     return (
       <div className="app-viewport">
@@ -24,12 +26,37 @@ export default function App() {
     );
   }
 
+  // 2. Landing Page (Default screen when opening website)
+  if (currentScreen === 'landing') {
+    return (
+      <div className="app-viewport">
+        <LandingPage />
+        {toastMessage && <ToastNotification toast={toastMessage} />}
+      </div>
+    );
+  }
+
+  // 3. Auth Screens (Sign In, Sign Up, Phone Auth, Email Verification)
   return (
     <div className="app-viewport">
       {/* Background ambient glow */}
       <div className="bg-ambient-glow" />
 
-      {/* Top Floating Control Bar */}
+      {/* Top Floating Control Bar with Home Link & Theme Toggle */}
+      <div className="auth-top-nav">
+        <button
+          type="button"
+          className="btn-back-home"
+          onClick={() => setCurrentScreen('landing')}
+          title="Return to Landing Page"
+        >
+          <span className="back-home-arrow">
+            <ArrowLeft size={14} />
+          </span>
+          <span>Back to Home</span>
+        </button>
+      </div>
+
       <div className="top-action-bar">
         <ThemeToggle />
       </div>

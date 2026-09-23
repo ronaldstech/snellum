@@ -6,8 +6,8 @@ import { UserProfile } from '../models/userProfile';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Current screen state: 'signin' | 'signup' | 'phone_auth' | 'verify_email' | 'authenticated'
-  const [currentScreen, setCurrentScreen] = useState('signin');
+  // Current screen state: 'landing' | 'signin' | 'signup' | 'phone_auth' | 'verify_email' | 'authenticated'
+  const [currentScreen, setCurrentScreen] = useState('landing');
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -150,7 +150,7 @@ export function AuthProvider({ children }) {
     await authService.signOut();
     setUser(null);
     setUserProfile(null);
-    setCurrentScreen('signin');
+    setCurrentScreen('landing');
     showToast('You have been signed out.', 'info');
   };
 

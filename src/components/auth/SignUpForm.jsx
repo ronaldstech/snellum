@@ -75,7 +75,12 @@ export default function SignUpForm() {
   return (
     <div className="auth-card animate-fade-in">
       <div className="auth-card-header">
-        <div className="app-logo-wrap">
+        <div
+          className="app-logo-wrap"
+          onClick={() => setCurrentScreen('landing')}
+          style={{ cursor: 'pointer' }}
+          title="Back to Home"
+        >
           <img src="/newlogo.png" alt="Snellum Logo" onError={(e) => { e.target.src = '/logo.png'; }} />
         </div>
         <h1 className="auth-card-title">Create Account</h1>
