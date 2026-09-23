@@ -24,6 +24,8 @@ import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/authService';
 import { giftService, GIFT_CATALOG } from '../../services/giftService';
 import { meetupService } from '../../services/meetupService';
+import { swipeService } from '../../services/swipeService';
+import { isFirebaseConfigured } from '../../services/firebase';
 import '../../styles/swipe.css';
 
 export default function SwipeView({ categoryFilter }) {
@@ -128,13 +130,43 @@ export default function SwipeView({ categoryFilter }) {
         colors: direction === 'superlike' ? ['#3B82F6', '#60A5FA', '#93C5FD'] : ['#FF4D85', '#FF85A1', '#8B5CF6'],
       });
 
-      // Simulate Mutual Match event
-      if (direction === 'superlike' || Math.random() > 0.4) {
-        setMatchedUser(currentProfile);
+      // Record the real swipe; show the match screen only on a genuine mutual match.
+      const handleLikeResult = (isNewMatch) => {
+        if (isNewMatch) {
+          setMatchedUser(currentProfile);
+        } else {
+          showToast(`You liked ${currentProfile.displayName}!`, 'success');
+        }
+      };
+
+      if (!isFirebaseConfigured || !user?.uid) {
+        // Demo mode fallback
+        handleLikeResult(direction === 'superlike' || Math.random() > 0.4);
       } else {
-        showToast(`You liked ${currentProfile.displayName}!`, 'success');
+        swipeService
+          .recordSwipe({
+            fromId: user.uid,
+            toId: currentProfile.uid,
+            type: 'like',
+            senderName: userProfile?.displayName || user?.displayName || 'Someone',
+          })
+          .then(handleLikeResult)
+          .catch(() => handleLikeResult(false));
       }
     } else if (direction === 'pass') {
+      if (isFirebaseConfigured && user?.uid) {
+        swipeService
+          .recordSwipe({
+            fromId: user.uid,
+            toId: currentProfile.uid,
+            type: 'dislike',
+            senderName: userProfile?.displayName || user?.displayName || 'Someone',
+          })
+          .then((missedMatch) => {
+            if (missedMatch) showToast(`${currentProfile.displayName} liked you before you passed 👀`, 'info');
+          })
+          .catch(() => {});
+      }
       showToast(`Passed on ${currentProfile.displayName}`, 'info');
     }
 
