@@ -28,6 +28,7 @@ export default function ChatList({ currentUserId, selectedChatId, onSelectChat, 
     isFirebaseConfigured && db ? [] : DEMO_MATCHES
   );
   const [partnerProfiles, setPartnerProfiles] = useState({});
+  const [matchProfiles, setMatchProfiles] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -67,6 +68,35 @@ export default function ChatList({ currentUserId, selectedChatId, onSelectChat, 
     );
     return () => unsub();
   }, [currentUserId]);
+
+  // Resolve real user profiles (name + photo) for each new match
+  useEffect(() => {
+    const uids = matches.filter((m) => typeof m === 'string');
+    if (!uids.length || !db || !isFirebaseConfigured) return;
+
+    let cancelled = false;
+    Promise.all(
+      uids.map(async (uid) => {
+        try {
+          const profile = await profileService.getUserProfile(uid);
+          return [uid, profile];
+        } catch {
+          return [uid, null];
+        }
+      })
+    ).then((entries) => {
+      if (cancelled) return;
+      const map = {};
+      entries.forEach(([uid, profile]) => {
+        map[uid] = profile;
+      });
+      setMatchProfiles((prev) => ({ ...prev, ...map }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [matches]);
 
   // Resolve partner profiles for each conversation (name, avatar, online status)
   useEffect(() => {
@@ -159,8 +189,13 @@ export default function ChatList({ currentUserId, selectedChatId, onSelectChat, 
               const isDemo = typeof match === 'object';
               const m = isDemo ? match : null;
               const uid = isDemo ? m.uid : match;
-              const name = isDemo ? m.firstName : 'Member';
-              const photo = isDemo ? m.photos?.[0] : '';
+              const profile = matchProfiles[uid];
+              const name = isDemo
+                ? m.firstName
+                : profile?.firstName || profile?.displayName || 'Member';
+              const photo = isDemo
+                ? m.photos?.[0]
+                : profile?.avatar || profile?.photos?.[0] || '';
               const onClick = () =>
                 handleOpenMatch({ uid, firstName: name, photos: [photo], avatar: photo });
               return (
@@ -202,7 +237,12 @@ export default function ChatList({ currentUserId, selectedChatId, onSelectChat, 
               <div
                 key={chat.id}
                 className={`chat-list-item ${isSelected ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''} ${chat.isSuperRequest ? 'super-chat' : ''}`}
-                onClick={() => onSelectChat(chat)}
+                onClick={() => onSelectChat({
+                  ...chat,
+                  partnerName: name,
+                  partnerAvatar: avatar,
+                  otherUid: chat.otherUid,
+                })}
               >
                 <div className="chat-avatar-wrapper">
                   <img

@@ -267,10 +267,14 @@
 
 .message-bubble {
   max-width: 75%;
+  min-width: 60px;
+  width: fit-content;
   padding: 0.75rem 1rem;
   border-radius: 18px;
   font-size: 13.5px;
   line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .message-row.mine .text-bubble {
@@ -872,6 +876,8 @@
 .message-bubble-wrap {
   position: relative;
   max-width: 75%;
+  min-width: 60px;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -939,6 +945,8 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 
 .super-inline-tag {
@@ -954,8 +962,10 @@
 }
 
 .bubble-text-content {
+  flex: 1;
+  min-width: 0;
   word-break: break-word;
-  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .edited-badge {

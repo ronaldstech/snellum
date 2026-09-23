@@ -59,15 +59,18 @@ export default function ChatWindow({ chat, currentUser, onBack, onUpgrade }) {
   const signedOfflineRef = useRef(false);
 
   const myUid = currentUser?.uid;
-  const partner =
-    Object.values(chat?.participantDetails || {}).find(
-      (p) => p?.name !== 'You'
-    ) || { name: 'Match', avatar: DEFAULT_AVATAR };
   const partnerUid =
     chat?.otherUid ||
     Object.keys(chat?.participantDetails || {}).find((k) => k !== myUid) || '';
-  const partnerName = partner?.name || chat?.partnerName || 'Match';
-  const partnerAvatar = partner?.avatar || DEFAULT_AVATAR;
+  // Prefer the freshly-resolved name/avatar passed from ChatList (from real user profiles),
+  // then fall back to whatever is stored in participantDetails on the chat document.
+  const participantFallback =
+    Object.values(chat?.participantDetails || {}).find((p) => p?.name !== 'You') ||
+    { name: 'Match', avatar: DEFAULT_AVATAR };
+  const partnerName =
+    chat?.partnerName || participantFallback?.name || 'Match';
+  const partnerAvatar =
+    chat?.partnerAvatar || participantFallback?.avatar || DEFAULT_AVATAR;
 
   // ── Ensure the deterministic chat exists, then stream everything ─────
   useEffect(() => {
