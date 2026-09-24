@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Flame,
   Compass,
   Heart,
   MessageCircle,
   User,
-  Settings,
+  SlidersHorizontal,
   Bell,
   Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
 import SwipeView from '../swipe/SwipeView';
+import { countActiveFilters } from '../../utils/discoveryFilters';
 import DiscoveryFiltersSidebar from '../swipe/DiscoveryFiltersSidebar';
+import DiscoveryFiltersModal from '../swipe/DiscoveryFiltersModal';
 import ProfileSidebar from '../profile/ProfileSidebar';
 import ExploreScreen from '../explore/ExploreScreen';
 import LikesScreen from '../likes/LikesScreen';
@@ -20,8 +22,6 @@ import MessagesPage from '../chat/MessagesPage';
 import ProfileScreen from '../profile/ProfileScreen';
 import PremiumStoreModal from '../premium/PremiumStoreModal';
 import NotificationDrawer from '../notifications/NotificationDrawer';
-import SettingsModal from '../settings/SettingsModal';
-import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/dashboard.css';
 
 export default function MatchDashboardPreview() {
@@ -34,8 +34,10 @@ export default function MatchDashboardPreview() {
   // Modals & Drawers
   const [showPremiumStore, setShowPremiumStore] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+
+  const activeFilterCount = useMemo(() => countActiveFilters(userProfile), [userProfile]);
 
   const handleStartChatWithPartner = async (partner) => {
     const myUid = user?.uid;
@@ -145,6 +147,19 @@ export default function MatchDashboardPreview() {
               <span>{userProfile?.sparks || 100}</span>
             </button>
 
+            {/* Discovery Filters */}
+            <button
+              type="button"
+              onClick={() => setShowFilters(true)}
+              className="btn-ghost dashboard-filters-button"
+              title="Discovery filters"
+            >
+              <SlidersHorizontal size={15} />
+              {activeFilterCount > 0 && (
+                <span className="swipe-filter-count">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>
+              )}
+            </button>
+
             {/* Notifications */}
             <button
               type="button"
@@ -155,8 +170,6 @@ export default function MatchDashboardPreview() {
               <Bell size={16} />
               <span className="notif-badge-dot" />
             </button>
-
-            <ThemeToggle />
 
             {/* Profile Avatar Pill → Profile Sidebar Drawer */}
             <div
@@ -183,17 +196,6 @@ export default function MatchDashboardPreview() {
                 {userProfile?.displayName || user?.displayName || 'Member'}
               </span>
             </div>
-
-            {/* Settings */}
-            <button
-              type="button"
-              onClick={() => setShowSettings(true)}
-              className="btn-ghost dashboard-settings-button"
-              style={{ padding: '0.4rem 0.55rem' }}
-              title="Settings"
-            >
-              <Settings size={15} />
-            </button>
           </div>
         </div>
       </header>
@@ -207,6 +209,7 @@ export default function MatchDashboardPreview() {
               <SwipeView
                 onOpenPremium={() => setShowPremiumStore(true)}
                 onStartChat={handleStartChatWithPartner}
+                showFloatingFilters={false}
               />
             </div>
           </div>
@@ -318,10 +321,12 @@ export default function MatchDashboardPreview() {
         }}
       />
 
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
+      {showFilters && (
+        <DiscoveryFiltersModal
+          onClose={() => setShowFilters(false)}
+          onOpenPremium={() => setShowPremiumStore(true)}
+        />
+      )}
 
       <ProfileSidebar
         isOpen={showProfile}

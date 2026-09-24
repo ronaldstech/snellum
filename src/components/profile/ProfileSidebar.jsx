@@ -1,5 +1,6 @@
 import { UserRound, X } from 'lucide-react';
 import ProfilePanel from './ProfilePanel';
+import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/profile.css';
 
 export default function ProfileSidebar({ isOpen, onClose, onOpenPremium }) {
@@ -22,6 +23,10 @@ export default function ProfileSidebar({ isOpen, onClose, onOpenPremium }) {
         </header>
 
         <div className="profile-drawer-scroll">
+          <div className="profile-drawer-theme">
+            <span>Appearance</span>
+            <ThemeToggle />
+          </div>
           <ProfilePanel mode="sidebar" onOpenPremium={onOpenPremium} />
         </div>
       </aside>

@@ -26,10 +26,11 @@ import { giftService, GIFT_CATALOG } from '../../services/giftService';
 import { meetupService } from '../../services/meetupService';
 import { swipeService } from '../../services/swipeService';
 import { isFirebaseConfigured } from '../../services/firebase';
+import { countActiveFilters } from '../../utils/discoveryFilters';
 import DiscoveryFiltersModal from './DiscoveryFiltersModal';
 import '../../styles/swipe.css';
 
-export default function SwipeView({ categoryFilter, onOpenPremium, onStartChat }) {
+export default function SwipeView({ categoryFilter, onOpenPremium, onStartChat, showFloatingFilters = true }) {
   const { user, userProfile, showToast, spendSparks } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -342,19 +343,23 @@ export default function SwipeView({ categoryFilter, onOpenPremium, onStartChat }
 
   return (
     <div className={`swipe-container animate-fade-in ${showBoostPrompt ? 'has-boost-prompt' : ''}`}>
-      <button
-        type="button"
-        className={`swipe-filter-button ${activeFilterCount > 0 ? 'has-filters' : ''}`}
-        onClick={() => setShowFilters(true)}
-        title="Discovery filters"
-        aria-label="Open discovery filters"
-      >
-        <SlidersHorizontal size={17} />
-        {activeFilterCount > 0 && <span className="swipe-filter-count">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>}
-      </button>
+      {showFloatingFilters && (
+        <>
+          <button
+            type="button"
+            className={`swipe-filter-button ${activeFilterCount > 0 ? 'has-filters' : ''}`}
+            onClick={() => setShowFilters(true)}
+            title="Discovery filters"
+            aria-label="Open discovery filters"
+          >
+            <SlidersHorizontal size={17} />
+            {activeFilterCount > 0 && <span className="swipe-filter-count">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>}
+          </button>
 
-      {showFilters && (
-        <DiscoveryFiltersModal onClose={() => setShowFilters(false)} onOpenPremium={onOpenPremium} />
+          {showFilters && (
+            <DiscoveryFiltersModal onClose={() => setShowFilters(false)} onOpenPremium={onOpenPremium} />
+          )}
+        </>
       )}
 
       {showBoostPrompt && (
@@ -817,48 +822,6 @@ function profileMatchesCategory(profile, categoryFilter) {
 
   return (CATEGORY_KEYWORDS[categoryFilter] || [categoryFilter.toLowerCase()])
     .some((keyword) => searchableProfileData.includes(keyword));
-}
-
-const DEFAULT_FILTERS = {
-  filterGender: 'Everyone',
-  filterMinAge: 18,
-  filterMaxAge: 60,
-  filterMaxDistance: 50,
-  filterAgeStrict: false,
-  filterDistanceStrict: false,
-  filterRelationshipStatus: 'Any',
-  filterReligion: 'Any',
-  filterSmoking: 'Any',
-  filterDrinking: 'Any',
-  filterZodiac: 'Any',
-  filterEducationLevel: 'Any',
-  filterVerifiedOnly: false,
-  filterOnlineOnly: false,
-  filterKids: 'Any',
-  filterPets: 'Any',
-  filterIntrovertExtrovert: 'Any',
-  filterLookingFor: 'Any',
-  filterMaxPhotos: 9,
-  filterHasBio: false,
-  filterFamilyPlans: 'Any',
-  filterCommunicationStyle: 'Any',
-  filterLoveStyle: 'Any',
-  filterCountry: 'Any',
-};
-
-function countActiveFilters(profile) {
-  if (!profile) return 0;
-  let count = 0;
-  Object.keys(DEFAULT_FILTERS).forEach((key) => {
-    const current = profile[key];
-    const defaultValue = DEFAULT_FILTERS[key];
-    if (typeof defaultValue === 'boolean') {
-      if (current === true) count += 1;
-    } else if (current !== undefined && current !== null && current !== defaultValue) {
-      count += 1;
-    }
-  });
-  return count;
 }
 
 function toRadians(degrees) {

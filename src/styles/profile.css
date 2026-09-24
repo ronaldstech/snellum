@@ -215,6 +215,37 @@
   background: var(--bg-main);
 }
 
+.profile-drawer-theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--bg-card-solid);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.profile-drawer-theme .theme-toggle-btn {
+  position: static;
+  padding: 0.45rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.profile-drawer-theme .theme-toggle-btn:hover {
+  background: var(--bg-input-focus);
+  color: var(--primary);
+}
+
 /* 1. Profile header: gradient-ring avatar + edit badge */
 .pp-header {
   display: flex;

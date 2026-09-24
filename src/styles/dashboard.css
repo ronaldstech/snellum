@@ -340,6 +340,39 @@
   padding: 0.45rem !important;
 }
 
+.dashboard-filters-button {
+  position: relative;
+  padding: 0.4rem 0.55rem;
+}
+
+/* Circular icon buttons in the mobile header. */
+@media (max-width: 768px) {
+  .dashboard-filters-button,
+  .notif-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    flex-shrink: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .user-pill {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+  }
+}
+
+.dashboard-filters-button .swipe-filter-count {
+  top: -6px;
+  right: -6px;
+}
+
 .notif-badge-dot {
   position: absolute;
   top: 4px;
@@ -1061,8 +1094,7 @@ button.settings-tile:hover {
 /* Keep secondary header controls out of phone and tablet layouts. */
 @media (max-width: 768px) {
   .btn-sparks-badge,
-  .dashboard-settings-button,
-  .theme-toggle-btn {
+  .dashboard-header .theme-toggle-btn {
     display: none;
   }
 }
