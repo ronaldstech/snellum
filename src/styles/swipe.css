@@ -252,7 +252,7 @@
 .photo-edge-button:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 3px; }
 .photo-edge-button:disabled { opacity: 0.28; cursor: default; }
 
-/* Swipe Stamp Overlays (LIKE / PASS / SUPERLIKE) */
+/* Swipe Stamp Overlays (LIKE / PASS) */
 .stamp-overlay {
   position: absolute;
   top: 2.5rem;
@@ -283,16 +283,7 @@
   background: rgba(239, 68, 68, 0.12);
 }
 
-.stamp-superlike {
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(0deg);
-  color: #3B82F6;
-  border: 4px solid #3B82F6;
-  background: rgba(59, 130, 246, 0.15);
-}
-
-/* Action Control Bar with 5 actions (Rewind, Pass, Super Like, Like, Gift) */
+/* Action Control Bar (Rewind, Pass, Meetup, Message, Like, Gift) */
 .swipe-action-row {
   display: flex;
   align-items: center;
@@ -339,7 +330,7 @@
   background: rgba(239, 68, 68, 0.08);
 }
 
-.btn-superlike-action {
+.btn-message-action {
   width: 44px;
   height: 44px;
   color: #3B82F6;

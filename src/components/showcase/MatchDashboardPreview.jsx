@@ -204,7 +204,10 @@ export default function MatchDashboardPreview() {
           <div className="discover-shell">
             <DiscoveryFiltersSidebar onOpenPremium={() => setShowPremiumStore(true)} />
             <div className="discover-main">
-              <SwipeView onOpenPremium={() => setShowPremiumStore(true)} />
+              <SwipeView
+                onOpenPremium={() => setShowPremiumStore(true)}
+                onStartChat={handleStartChatWithPartner}
+              />
             </div>
           </div>
         )}

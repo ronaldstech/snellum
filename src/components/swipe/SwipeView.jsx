@@ -4,7 +4,6 @@ import {
   Heart,
   X,
   RotateCcw,
-  Star,
   Gift,
   Flame,
   ShieldCheck,
@@ -30,7 +29,7 @@ import { isFirebaseConfigured } from '../../services/firebase';
 import DiscoveryFiltersModal from './DiscoveryFiltersModal';
 import '../../styles/swipe.css';
 
-export default function SwipeView({ categoryFilter, onOpenPremium }) {
+export default function SwipeView({ categoryFilter, onOpenPremium, onStartChat }) {
   const { user, userProfile, showToast, spendSparks } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,12 +126,12 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
     // Save for rewind
     setSwipeHistory((prev) => [...prev, { profile: currentProfile, index: currentIndex, direction }]);
 
-    if (direction === 'like' || direction === 'superlike') {
+    if (direction === 'like') {
       confetti({
-        particleCount: direction === 'superlike' ? 90 : 65,
+        particleCount: 65,
         spread: 65,
         origin: { y: 0.65 },
-        colors: direction === 'superlike' ? ['#3B82F6', '#60A5FA', '#93C5FD'] : ['#FF4D85', '#FF85A1', '#8B5CF6'],
+        colors: ['#FF4D85', '#FF85A1', '#8B5CF6'],
       });
 
       // Record the real swipe; show the match screen only on a genuine mutual match.
@@ -146,7 +145,7 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
 
       if (!isFirebaseConfigured || !user?.uid) {
         // Demo mode fallback
-        handleLikeResult(direction === 'superlike' || Math.random() > 0.4);
+        handleLikeResult(Math.random() > 0.4);
       } else {
         swipeService
           .recordSwipe({
@@ -243,6 +242,16 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
     showToast(`Rewound back to ${last.profile.displayName}`, 'info');
   };
 
+  // Message a profile directly from the deck
+  const handleMessageProfile = () => {
+    if (!currentProfile) return;
+    if (onStartChat) {
+      onStartChat(currentProfile);
+      return;
+    }
+    showToast(`Messaging ${currentProfile.displayName} is coming soon.`, 'info');
+  };
+
   // Photo Carousel Tap Zone Navigation
   const handleNextPhoto = (e) => {
     e.stopPropagation();
@@ -284,8 +293,6 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
       runSwipe('like');
     } else if (dragOffset.x < -threshold) {
       runSwipe('pass');
-    } else if (dragOffset.y < -threshold) {
-      runSwipe('superlike');
     } else {
       setDragOffset({ x: 0, y: 0 });
     }
@@ -293,15 +300,12 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
 
   const cardRotation = dragOffset.x * 0.08;
   const stampOpacity = Math.min(Math.abs(dragOffset.x) / 80, 1);
-  const superlikeOpacity = dragOffset.y < -40 ? Math.min(Math.abs(dragOffset.y) / 80, 1) : 0;
   const dragProgress = Math.min(Math.abs(dragOffset.x) / 180, 1);
   const exitTransform = swipeExit === 'like'
     ? 'translate3d(130vw, -4vh, 0) rotate(28deg)'
     : swipeExit === 'pass'
       ? 'translate3d(-130vw, -4vh, 0) rotate(-28deg)'
-      : swipeExit === 'superlike'
-        ? 'translate3d(0, -130vh, 0)'
-        : null;
+      : null;
 
   if (loading) {
     return (
@@ -447,11 +451,6 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
               PASS
             </div>
           )}
-          {dragOffset.y < -40 && (
-            <div className="stamp-overlay stamp-superlike" style={{ opacity: superlikeOpacity }}>
-              SUPER LIKE
-            </div>
-          )}
 
           {/* Main Photo Image */}
           <img
@@ -558,14 +557,14 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
           <CalendarPlus size={20} />
         </button>
 
-        {/* Super Like */}
+        {/* Message */}
         <button
           type="button"
-          className="action-circle-btn btn-superlike-action"
-          onClick={() => runSwipe('superlike')}
-          title="Super Like"
+          className="action-circle-btn btn-message-action"
+          onClick={handleMessageProfile}
+          title="Send a message"
         >
-          <Star size={20} fill="#3B82F6" />
+          <MessageCircle size={20} />
         </button>
 
         {/* Like */}
@@ -633,7 +632,7 @@ export default function SwipeView({ categoryFilter, onOpenPremium }) {
             <footer className="profile-detail-actions">
               <button type="button" className="btn-ghost" onClick={() => { setDetailUser(null); runSwipe('pass'); }}><X size={17} /> Pass</button>
               <button type="button" className="btn-primary" onClick={() => { setDetailUser(null); runSwipe('like'); }}><Heart size={17} fill="#FFFFFF" /> Like</button>
-              <button type="button" className="profile-message-button" onClick={() => showToast(`Messaging ${detailUser.displayName} is coming soon.`, 'info')} aria-label={`Message ${detailUser.displayName}`}><MessageCircle size={19} /></button>
+              <button type="button" className="profile-message-button" onClick={() => handleMessageProfile()} aria-label={`Message ${detailUser.displayName}`}><MessageCircle size={19} /></button>
             </footer>
           </aside>
         </div>
