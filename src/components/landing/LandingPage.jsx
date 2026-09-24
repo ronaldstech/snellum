@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Heart,
   Flame,
@@ -89,17 +89,10 @@ export default function LandingPage() {
               <ThemeToggle />
               <button
                 type="button"
-                className="btn-header-signin"
-                onClick={() => handleNavigate('signin')}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
                 className="btn-header-join"
                 onClick={() => handleNavigate('signup')}
               >
-                Join Free
+                Get Started
               </button>
               <button
                 type="button"

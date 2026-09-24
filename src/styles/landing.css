@@ -708,6 +708,21 @@
 }
 
 @media (max-width: 768px) {
+  .landing-container {
+    padding: 0 1rem;
+  }
+  .landing-nav {
+    height: 60px;
+    gap: 0.5rem;
+  }
+  .landing-nav-actions {
+    gap: 0.5rem;
+  }
+  .btn-header-join {
+    white-space: nowrap;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+  }
   .landing-nav-links {
     display: none;
   }
@@ -717,5 +732,130 @@
   .footer-top {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* Tighter vertical rhythm on mobile */
+  .landing-hero {
+    padding: 2.25rem 0 2.5rem;
+  }
+  .hero-grid {
+    gap: 2.25rem;
+  }
+  .hero-title {
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge-pill {
+    margin-bottom: 0.9rem;
+  }
+  .landing-section {
+    padding: 2.75rem 0;
+  }
+  .section-head {
+    margin-bottom: 1.75rem;
+  }
+  .landing-cta {
+    padding: 2.75rem 0;
+  }
+  .landing-footer {
+    padding: 2.25rem 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.7rem;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.95rem;
+  }
+  .hero-stats-row {
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .stat-number {
+    font-size: 1.1rem;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  .section-heading {
+    font-size: 1.45rem;
+  }
+  .section-subtext {
+    font-size: 0.9rem;
+  }
+  .features-grid,
+  .stories-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .clean-feature-card,
+  .clean-step-card,
+  .story-card {
+    padding: 1.25rem;
+  }
+  .feature-title {
+    font-size: 1.05rem;
+  }
+  .feature-body {
+    font-size: 0.88rem;
+  }
+  .step-title {
+    font-size: 1rem;
+  }
+  .step-desc {
+    font-size: 0.86rem;
+  }
+  .cta-heading {
+    font-size: 1.55rem;
+  }
+  .cta-text {
+    font-size: 0.95rem;
+  }
+  .btn-cta-submit {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.4rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .landing-nav {
+    gap: 0.4rem;
+  }
+  .landing-nav-actions {
+    gap: 0.4rem;
+  }
+  .brand-icon-wrap {
+    width: 30px;
+    height: 30px;
+  }
+  .brand-icon-wrap img {
+    width: 18px;
+    height: 18px;
+  }
+  .brand-name {
+    font-size: 1.05rem;
+  }
+  .btn-header-join {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
   }
 }
