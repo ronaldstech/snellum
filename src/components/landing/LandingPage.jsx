@@ -13,6 +13,7 @@ import {
   Compass,
   MessageCircle,
   Sparkles,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../common/ThemeToggle';
@@ -287,6 +288,16 @@ export default function LandingPage() {
               <h3 className="feature-title">Real-Time Messaging</h3>
               <p className="feature-body">
                 Connect instantly with matches through clean chat, photo sharing, and smooth voice messages.
+              </p>
+            </div>
+
+            <div className="clean-feature-card">
+              <div className="feature-icon-wrapper">
+                <Video size={22} />
+              </div>
+              <h3 className="feature-title">Video & Audio Calls</h3>
+              <p className="feature-body">
+                Take conversations further with crystal-clear voice notes and face-to-face video calls, right inside the app.
               </p>
             </div>
 
