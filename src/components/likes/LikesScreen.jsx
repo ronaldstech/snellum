@@ -92,6 +92,7 @@ export default function LikesScreen({ onOpenPremium, onStartChat }) {
       {/* Header Banner */}
       <div className="likes-header-banner">
         <div className="likes-header-info">
+          <span className="likes-heading-kicker">Your admirers</span>
           <div className="likes-count-pill">
             <Heart size={16} fill="var(--primary)" color="var(--primary)" />
             <span>{likes.length} People Liked You</span>

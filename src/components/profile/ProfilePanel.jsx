@@ -14,9 +14,13 @@ import {
   Lock,
   ArrowRight,
   Rocket,
+  Share2,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { isFirebaseConfigured } from '../../services/firebase';
+import { shareService } from '../../services/shareService';
+import ShareModal from '../common/ShareModal';
 import EditProfileModal from './EditProfileModal';
 import '../../styles/profile.css';
 
@@ -55,7 +59,16 @@ function formatDate(dt) {
 export default function ProfilePanel({ mode = 'page', onOpenPremium }) {
   const { userProfile, user, showToast } = useAuth();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [shareConfig, setShareConfig] = useState({
+    isOpen: false,
+    title: '',
+    text: '',
+    url: '',
+    isReferral: false,
+    referralCode: null,
+  });
   const isSidebar = mode === 'sidebar';
+  const userReferralCode = shareService.getUserReferralCode(user);
 
   const profile = userProfile;
   const avatar = profile?.avatar;
@@ -329,6 +342,59 @@ export default function ProfilePanel({ mode = 'page', onOpenPremium }) {
 
             <div className="pp-menu-divider" />
 
+            {/* Share Profile */}
+            <button
+              type="button"
+              className="pp-menu-item"
+              onClick={() => {
+                setShareConfig({
+                  isOpen: true,
+                  title: `${profile?.displayName || 'My'} Profile on Snellum`,
+                  text: `Check out my dating profile on Snellum! Meet verified singles in Malawi:`,
+                  url: shareService.getProfileShareLink(user?.uid || 'me', userReferralCode),
+                  isReferral: false,
+                });
+              }}
+            >
+              <span className="pp-menu-icon" style={{ background: 'rgba(255, 77, 133, 0.12)', color: '#FF4D85' }}>
+                <Share2 size={18} />
+              </span>
+              <div className="pp-menu-copy">
+                <b>Share My Profile</b>
+                <small>Send link via WhatsApp or socials</small>
+              </div>
+              <ChevronRight size={17} className="pp-menu-arrow" />
+            </button>
+
+            <div className="pp-menu-divider" />
+
+            {/* Refer a Friend for 100 Sparks */}
+            <button
+              type="button"
+              className="pp-menu-item"
+              onClick={() => {
+                setShareConfig({
+                  isOpen: true,
+                  title: 'Invite Friends to Snellum',
+                  text: `Join me on Snellum - The modern dating platform for meaningful connections. Use my invite link to get 100 Free Sparks!`,
+                  url: shareService.getReferralLink(user),
+                  isReferral: true,
+                  referralCode: userReferralCode,
+                });
+              }}
+            >
+              <span className="pp-menu-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B' }}>
+                <Gift size={18} />
+              </span>
+              <div className="pp-menu-copy">
+                <b>Refer a Friend (Get 100 Sparks)</b>
+                <small>Give 100 sparks, get 100 sparks</small>
+              </div>
+              <ChevronRight size={17} className="pp-menu-arrow" />
+            </button>
+
+            <div className="pp-menu-divider" />
+
             <button type="button" className="pp-menu-item" onClick={() => showToast('Settings & Account Privacy', 'info')}>
               <span className="pp-menu-icon" style={{ background: 'rgba(108, 92, 231, 0.12)', color: '#6C5CE7' }}>
                 <Settings size={18} />
@@ -342,6 +408,17 @@ export default function ProfilePanel({ mode = 'page', onOpenPremium }) {
           </div>
         </section>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={shareConfig.isOpen}
+        onClose={() => setShareConfig((prev) => ({ ...prev, isOpen: false }))}
+        title={shareConfig.title}
+        text={shareConfig.text}
+        url={shareConfig.url}
+        isReferral={shareConfig.isReferral}
+        referralCode={shareConfig.referralCode}
+      />
 
       {/* Edit Profile Modal */}
       <EditProfileModal

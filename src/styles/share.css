@@ -1,0 +1,260 @@
+/* ===================================================
+   SOCIAL SHARING & REFERRAL MODAL (share.css)
+   =================================================== */
+
+.share-modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  width: 95%;
+  max-width: 520px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.share-title-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.share-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 77, 133, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-title-group h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.share-title-group span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Referral Highlight Box */
+.referral-highlight-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(255, 77, 133, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.referral-highlight-box strong {
+  display: block;
+  font-size: 13.5px;
+  color: #F59E0B;
+  margin-bottom: 0.2rem;
+}
+
+.referral-highlight-box p {
+  font-size: 12px;
+  color: var(--text-main);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.referral-code-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--input-bg);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.referral-code-pill span {
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+}
+
+/* Share Link Box */
+.share-link-box {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 0.4rem 0.5rem;
+  align-items: center;
+}
+
+.share-link-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 12.5px;
+  color: var(--text-main);
+  padding: 0.35rem 0.5rem;
+  outline: none;
+  font-family: inherit;
+  text-overflow: ellipsis;
+}
+
+.btn-copy-link {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-copy-link:hover {
+  background: var(--card-hover);
+  border-color: var(--primary);
+}
+
+.btn-copy-link.copied {
+  background: #10B981;
+  color: #fff;
+  border-color: #10B981;
+}
+
+/* Native Web Share Button */
+.btn-native-share {
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--primary-glow);
+  transition: var(--transition-smooth);
+}
+
+.btn-native-share:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* Social Share Grid */
+.social-share-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.social-share-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+}
+
+.social-share-item:hover {
+  background: var(--card-hover);
+  transform: translateY(-2px);
+  border-color: var(--border-focus);
+}
+
+.social-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.social-share-item.whatsapp .social-icon-wrapper {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25D366;
+}
+
+.social-share-item.twitter .social-icon-wrapper {
+  background: rgba(29, 155, 240, 0.15);
+  color: #1D9BF0;
+}
+
+.social-share-item.telegram .social-icon-wrapper {
+  background: rgba(0, 136, 204, 0.15);
+  color: #0088CC;
+}
+
+.social-share-item.facebook .social-icon-wrapper {
+  background: rgba(24, 119, 242, 0.15);
+  color: #1877F2;
+}
+
+.social-share-item.email .social-icon-wrapper {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.social-share-item.qr-btn .social-icon-wrapper {
+  background: rgba(168, 85, 247, 0.15);
+  color: #A855F7;
+}
+
+/* QR Code Preview */
+.qr-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--input-bg);
+  border: 1px dashed var(--border-light);
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+}
+
+.qr-image {
+  width: 140px;
+  height: 140px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  padding: 6px;
+}
+
+.qr-preview-container p {
+  font-size: 11px;
+  color: var(--text-muted);
+}

@@ -1,0 +1,404 @@
+/* ===================================================
+   STRIPE DIRECT WEB CHECKOUT (stripeCheckout.css)
+   =================================================== */
+
+.stripe-checkout-modal {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  width: 95%;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.stripe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stripe-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stripe-logo-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #635bff;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.direct-web-tag {
+  background: rgba(99, 91, 255, 0.12);
+  color: #635bff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(99, 91, 255, 0.25);
+}
+
+/* Web Bypass Banner */
+.web-bypass-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(255, 77, 133, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+.bypass-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #f59e0b;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.web-bypass-banner p {
+  font-size: 11.5px;
+  color: var(--text-main);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Checkout Item Bar */
+.checkout-item-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1rem;
+}
+
+.item-icon-col {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-details-col {
+  flex: 1;
+}
+
+.item-details-col h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.item-details-col span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.item-price-col {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-price-col strong {
+  font-size: 1.15rem;
+  color: var(--primary);
+}
+
+.item-price-col small {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+/* Quick Pay Buttons (Apple Pay & Google Pay) */
+.quick-pay-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quick-pay-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.btn-apple-pay {
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-apple-pay:hover {
+  background: #111;
+  transform: translateY(-1px);
+}
+
+.btn-apple-pay strong {
+  font-size: 14px;
+}
+
+.btn-google-pay {
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: var(--radius-md);
+  padding: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+}
+
+.btn-google-pay:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.gpay-text {
+  font-weight: 700;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.or-divider span {
+  padding: 0 0.5rem;
+}
+
+/* Card Input Form */
+.card-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-input-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.card-input-form label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.checkout-input {
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  font-size: 13px;
+  color: var(--text-main);
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition-smooth);
+}
+
+.checkout-input:focus {
+  border-color: #635bff;
+  box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.15);
+}
+
+.card-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.card-input-wrap .checkout-input {
+  width: 100%;
+  padding-right: 3rem;
+}
+
+.card-brand-indicator {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.brand-chip {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.brand-chip.visa {
+  background: #1a1f71;
+  color: #fff;
+}
+
+.brand-chip.mc {
+  background: #eb001b;
+  color: #fff;
+}
+
+.brand-chip.amex {
+  background: #006fcf;
+  color: #fff;
+}
+
+.form-row-split {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  gap: 0.5rem;
+}
+
+.btn-stripe-pay {
+  background: linear-gradient(135deg, #635bff 0%, #7a73ff 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.8rem;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3);
+  transition: var(--transition-smooth);
+  margin-top: 0.4rem;
+}
+
+.btn-stripe-pay:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn-stripe-pay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stripe-trust-footer {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Success Receipt View */
+.checkout-success-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.success-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-success-view h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.success-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 380px;
+  margin: 0;
+}
+
+.receipt-summary-card {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.receipt-row span {
+  color: var(--text-muted);
+}
+
+.receipt-row strong {
+  color: var(--text-main);
+}
+
+.savings-green {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.mono-ref {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}

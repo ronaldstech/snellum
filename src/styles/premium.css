@@ -287,3 +287,167 @@
   font-size: 11px;
   color: var(--text-main);
 }
+
+/* Web Rate Promotion Pill */
+.web-rate-guarantee-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #10B981;
+}
+
+/* Payment Gateway Toggle */
+.payment-gateway-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+}
+
+.gateway-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.gateway-options {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.gateway-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: var(--transition-smooth);
+}
+
+.gateway-btn:hover {
+  color: var(--text-main);
+}
+
+.gateway-btn.active {
+  background: var(--surface);
+  color: #635bff;
+  border-color: rgba(99, 91, 255, 0.3);
+  box-shadow: var(--shadow-sm);
+}
+
+.web-discount-note {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.green-save {
+  color: #10B981;
+  font-weight: 700;
+}
+
+/* Referrals View in Store */
+.referrals-store-view {
+  padding: 1rem 0;
+}
+
+.referral-banner-hero {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(255, 77, 133, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.referral-icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.referral-banner-hero h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.referral-banner-hero p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.referral-code-display {
+  background: var(--surface);
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 12px;
+}
+
+.referral-code-display strong {
+  font-size: 14px;
+  color: #F59E0B;
+  letter-spacing: 1px;
+}
+
+.mobile-money-checkout-box {
+  margin-top: 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.mm-inputs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mm-select,
+.mm-phone-input {
+  flex: 1;
+  min-width: 140px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  color: var(--text-main);
+  outline: none;
+}
+

@@ -14,50 +14,41 @@ import {
   MessageCircle,
   Sparkles,
   Video,
+  Crown,
+  CheckCircle2,
+  Gift,
+  Share2,
+  CreditCard,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../common/ThemeToggle';
+import DatingEventsSection from '../events/DatingEventsSection';
+import DatingTipsSection from '../blog/DatingTipsSection';
+import PublicProfileModal from '../profile/PublicProfileModal';
+import StripeCheckoutModal from '../premium/StripeCheckoutModal';
+import ShareModal from '../common/ShareModal';
+import { PUBLIC_PROFILES } from '../../data/publicProfilesData';
+import { paymentService } from '../../services/paymentService';
+import { shareService } from '../../services/shareService';
 import '../../styles/landing.css';
 
-const DEMO_PROFILES = [
-  {
-    name: 'Tamara Banda',
-    age: 24,
-    location: 'Lilongwe, Area 43',
-    occupation: 'Creative Designer',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=700&auto=format&fit=crop&q=80',
-    tags: ['Art Lover', 'Coffee Walks', 'Photography'],
-    bio: 'Looking for real conversations, good music, and spontaneous weekend coffee walks.',
-  },
-  {
-    name: 'Chisomo Phiri',
-    age: 26,
-    location: 'Blantyre, Mandala',
-    occupation: 'Architect & Tennis Enthusiast',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=700&auto=format&fit=crop&q=80',
-    tags: ['Fitness', 'Architecture', 'Cooking'],
-    bio: 'Fan of live jazz sessions, exploring new places, and ambitious people.',
-  },
-  {
-    name: 'Kondwani Moyo',
-    age: 27,
-    location: 'Zomba, Plateau View',
-    occupation: 'Software Developer',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=700&auto=format&fit=crop&q=80',
-    tags: ['Hiking', 'Books', 'Technology'],
-    bio: 'Up for weekend hikes, relaxed dinners, and sharing great conversations.',
-  },
-];
-
 export default function LandingPage() {
-  const { setCurrentScreen } = useAuth();
+  const { setCurrentScreen, user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileIndex, setProfileIndex] = useState(0);
 
-  const activeProfile = DEMO_PROFILES[profileIndex];
+  // Modals for deep linking and interactions
+  const [selectedPublicProfile, setSelectedPublicProfile] = useState(null);
+  const [selectedStripePlan, setSelectedStripePlan] = useState(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
-  const handleNextProfile = () => {
-    setProfileIndex((prev) => (prev + 1) % DEMO_PROFILES.length);
+  const activeHeroProfile = PUBLIC_PROFILES[profileIndex] || PUBLIC_PROFILES[0];
+  const subscriptionPlans = paymentService.getSubscriptionPlans();
+  const referralLink = shareService.getReferralLink(user);
+
+  const handleNextHeroProfile = () => {
+    setProfileIndex((prev) => (prev + 1) % PUBLIC_PROFILES.length);
   };
 
   const handleNavigate = (screen = 'signup') => {
@@ -66,24 +57,45 @@ export default function LandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleShareReferral = async () => {
+    const res = await shareService.shareContent({
+      title: 'Join me on Snellum Dating',
+      text: 'Join me on Snellum - The modern dating platform for meaningful connections. Claim 100 free Sparks on sign up:',
+      url: referralLink,
+    });
+    if (!res.success || res.method === 'clipboard') {
+      setShareModalOpen(true);
+    }
+  };
+
   return (
     <div className="landing-page-root">
       {/* 1. Header Navigation */}
       <header className="landing-header">
         <div className="landing-container">
           <nav className="landing-nav">
-            <div className="landing-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div
+              className="landing-brand"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
               <div className="brand-icon-wrap">
-                <img src="/newlogo.png" alt="Snellum Logo" onError={(e) => { e.target.src = '/logo.png'; }} />
+                <img
+                  src="/newlogo.png"
+                  alt="Snellum Logo"
+                  onError={(e) => {
+                    e.target.src = '/logo.png';
+                  }}
+                />
               </div>
               <span className="brand-name">Snellum</span>
             </div>
 
             <ul className="landing-nav-links">
               <li><a href="#about">About</a></li>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#how-it-works">How It Works</a></li>
-              <li><a href="#community">Community</a></li>
+              <li><a href="#profiles">Singles</a></li>
+              <li><a href="#events">Singles Events</a></li>
+              <li><a href="#blog">Dating Tips</a></li>
+              <li><a href="#pricing">VIP Pricing</a></li>
             </ul>
 
             <div className="landing-nav-actions">
@@ -111,9 +123,10 @@ export default function LandingPage() {
         <div className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-nav-links">
             <a href="#about" onClick={() => setMobileMenuOpen(false)}>About</a>
-            <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
-            <a href="#community" onClick={() => setMobileMenuOpen(false)}>Community</a>
+            <a href="#profiles" onClick={() => setMobileMenuOpen(false)}>Singles</a>
+            <a href="#events" onClick={() => setMobileMenuOpen(false)}>Singles Events</a>
+            <a href="#blog" onClick={() => setMobileMenuOpen(false)}>Dating Tips</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>VIP Pricing</a>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
             <button
@@ -143,7 +156,7 @@ export default function LandingPage() {
             <div>
               <div className="hero-badge-pill">
                 <Sparkles size={14} />
-                <span>Meaningful Dating Platform</span>
+                <span>Meaningful Dating in Malawi</span>
               </div>
 
               <h1 className="hero-title">
@@ -152,7 +165,7 @@ export default function LandingPage() {
 
               <p className="hero-subtitle">
                 Snellum is built for people who want genuine relationships, verified profiles,
-                and simple conversations without the noise.
+                curated speed dating mixers, and direct conversations without the noise.
               </p>
 
               <div className="hero-cta-group">
@@ -179,21 +192,25 @@ export default function LandingPage() {
                   <span className="stat-label">Verified Members</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-number">Safe & Private</span>
-                  <span className="stat-label">Protected Profiles</span>
+                  <span className="stat-number">Save 30%</span>
+                  <span className="stat-label">Direct Web Rates</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-number">Real People</span>
-                  <span className="stat-label">Zero Bot Tolerance</span>
+                  <span className="stat-number">Singles Mixers</span>
+                  <span className="stat-label">Real-World Events</span>
                 </div>
               </div>
             </div>
 
             {/* Profile Card Preview */}
             <div className="hero-card-container">
-              <div className="clean-dating-card">
+              <div
+                className="clean-dating-card"
+                onClick={() => setSelectedPublicProfile(activeHeroProfile)}
+                title="Click to view full public profile"
+              >
                 <div className="card-image-box">
-                  <img src={activeProfile.image} alt={activeProfile.name} />
+                  <img src={activeHeroProfile.photos[0]} alt={activeHeroProfile.name} />
                   <div className="card-overlay-gradient" />
 
                   <div className="card-verified-badge">
@@ -203,14 +220,14 @@ export default function LandingPage() {
 
                   <div className="card-details-content">
                     <div className="card-title-line">
-                      {activeProfile.name}, {activeProfile.age}
+                      {activeHeroProfile.name}, {activeHeroProfile.age}
                     </div>
                     <div className="card-sub-line">
                       <MapPin size={14} />
-                      <span>{activeProfile.location}</span>
+                      <span>{activeHeroProfile.location}</span>
                     </div>
                     <div className="card-interests-tags">
-                      {activeProfile.tags.map((tag, idx) => (
+                      {activeHeroProfile.tags.map((tag, idx) => (
                         <span key={idx} className="interest-tag">{tag}</span>
                       ))}
                     </div>
@@ -221,24 +238,33 @@ export default function LandingPage() {
                   <button
                     type="button"
                     className="action-btn-circle btn-pass"
-                    onClick={handleNextProfile}
-                    title="Pass"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextHeroProfile();
+                    }}
+                    title="Next Profile"
                   >
                     <X size={20} />
                   </button>
                   <button
                     type="button"
                     className="action-btn-circle btn-superlike"
-                    onClick={handleNextProfile}
-                    title="Super Like"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPublicProfile(activeHeroProfile);
+                    }}
+                    title="View Profile Details"
                   >
                     <Star size={18} />
                   </button>
                   <button
                     type="button"
                     className="action-btn-circle btn-like"
-                    onClick={handleNextProfile}
-                    title="Like"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigate('signup');
+                    }}
+                    title="Connect Free"
                   >
                     <Heart size={20} />
                   </button>
@@ -249,197 +275,162 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Features Section */}
-      <section className="landing-section" id="features">
+      {/* 3. Discoverable Public Profiles Section */}
+      <section className="landing-section" id="profiles">
         <div className="landing-container">
           <div className="section-head">
-            <span className="section-tag">Features</span>
-            <h2 className="section-heading">Designed for Genuine Connections</h2>
+            <span className="section-tag">Public Profiles</span>
+            <h2 className="section-heading">Meet Verified Singles in Malawi</h2>
             <p className="section-subtext">
-              Simple, reliable tools to help you meet people nearby safely and comfortably.
+              Real people, genuine ambitions, and verified selfies. Browse public preview profiles or
+              create your own in under 2 minutes.
             </p>
           </div>
 
-          <div className="features-grid">
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <ShieldCheck size={22} />
+          <div className="public-profiles-grid">
+            {PUBLIC_PROFILES.map((p) => (
+              <div
+                key={p.slug}
+                className="public-single-card"
+                onClick={() => setSelectedPublicProfile(p)}
+              >
+                <div className="public-single-thumb">
+                  <img src={p.photos[0]} alt={p.name} loading="lazy" />
+                  <div className="public-thumb-overlay">
+                    <span className="location-pill">
+                      <MapPin size={11} /> {p.city}
+                    </span>
+                  </div>
+                </div>
+                <div className="public-single-info">
+                  <div className="public-single-header">
+                    <h4>{p.name}, {p.age}</h4>
+                    <ShieldCheck size={16} color="#FF4D85" />
+                  </div>
+                  <span className="occupation-text">{p.occupation}</span>
+                  <p className="bio-snippet">{p.bio}</p>
+                  <div className="public-tags-row">
+                    {p.tags.slice(0, 3).map((t, idx) => (
+                      <span key={idx} className="small-tag">{t}</span>
+                    ))}
+                  </div>
+                  <div className="public-card-action">
+                    <button type="button" className="btn-view-profile">
+                      View Profile & Connect <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 className="feature-title">Verified Profiles</h3>
-              <p className="feature-body">
-                Photo verification helps ensure the person you are chatting with is real and authentic.
-              </p>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <Compass size={22} />
-              </div>
-              <h3 className="feature-title">Smart Proximity Discovery</h3>
-              <p className="feature-body">
-                Discover singles in your city or area with shared interests, hobbies, and lifestyles.
-              </p>
-            </div>
+      {/* 4. Search-Indexed Singles Events & Mixers */}
+      <DatingEventsSection onNavigateAuth={handleNavigate} />
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <MessageCircle size={22} />
-              </div>
-              <h3 className="feature-title">Real-Time Messaging</h3>
-              <p className="feature-body">
-                Connect instantly with matches through clean chat, photo sharing, and smooth voice messages.
-              </p>
-            </div>
+      {/* 5. Dating Tips & Advice Blog */}
+      <DatingTipsSection onNavigateAuth={handleNavigate} />
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <Video size={22} />
-              </div>
-              <h3 className="feature-title">Video & Audio Calls</h3>
-              <p className="feature-body">
-                Take conversations further with crystal-clear voice notes and face-to-face video calls, right inside the app.
-              </p>
+      {/* 6. Direct Web Pricing Section (Stripe 30% Savings) */}
+      <section className="landing-section" id="pricing">
+        <div className="landing-container">
+          <div className="section-head">
+            <div className="section-kicker">
+              <CreditCard size={14} color="#10B981" />
+              <span>Direct Web Monetization • Stripe Integration</span>
             </div>
+            <h2 className="section-heading">Direct Web VIP Rates (Save 30%)</h2>
+            <p className="section-subtext">
+              By purchasing your VIP membership directly on our secure web platform, you bypass the
+              30% Apple & Google in-app fees. Enjoy instant activation, Apple Pay, Google Pay, and cards!
+            </p>
+          </div>
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <Calendar size={22} />
-              </div>
-              <h3 className="feature-title">Meetup Planner</h3>
-              <p className="feature-body">
-                Coordinate real-world public coffee dates and meetups directly with your matches.
-              </p>
-            </div>
+          <div className="landing-pricing-grid">
+            {subscriptionPlans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`landing-pricing-card ${plan.popular ? 'popular' : ''}`}
+              >
+                {plan.popular && <span className="popular-badge">Most Popular</span>}
+                <div className="pricing-header">
+                  <h3>{plan.name}</h3>
+                  <div className="pricing-rates">
+                    <strong className="rate-amount">{plan.usdMonthlyPrice}</strong>
+                    <span className="rate-period">/month</span>
+                  </div>
+                  <div className="mwk-sub-rate">
+                    <span>{plan.monthlyPrice}</span>
+                    <span className="save-badge">Save 30% on Web</span>
+                  </div>
+                  <div className="app-store-comparison">
+                    <span>App Store Price: <s>{plan.appStoreMonthlyPrice}</s></span>
+                  </div>
+                </div>
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <Lock size={22} />
-              </div>
-              <h3 className="feature-title">Privacy & Safety First</h3>
-              <p className="feature-body">
-                Your data is protected. You have full control over your profile visibility and active status.
-              </p>
-            </div>
+                <ul className="pricing-features">
+                  {plan.features.map((feat, idx) => (
+                    <li key={idx}>
+                      <CheckCircle2 size={14} color="#10B981" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
 
-            <div className="clean-feature-card">
-              <div className="feature-icon-wrapper">
-                <Sparkles size={22} />
+                <button
+                  type="button"
+                  className={`btn-pricing-cta ${plan.popular ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setSelectedStripePlan(plan)}
+                >
+                  <CreditCard size={15} />
+                  <span>Subscribe via Stripe</span>
+                </button>
               </div>
-              <h3 className="feature-title">Intuitive Experience</h3>
-              <p className="feature-body">
-                Fast, responsive interface that feels natural on both mobile phones and desktops.
-              </p>
+            ))}
+          </div>
+
+          <div className="payment-security-callout">
+            <div className="security-badges">
+              <span>🔒 256-Bit SSL Encrypted</span>
+              <span> Apple Pay Ready</span>
+              <span>GPay Google Pay</span>
+              <span>💳 Visa / Mastercard / Amex</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. How It Works */}
-      <section className="landing-section" id="how-it-works">
+      {/* 7. Referral Rewards Banner */}
+      <section className="landing-referral-banner">
         <div className="landing-container">
-          <div className="section-head">
-            <span className="section-tag">How It Works</span>
-            <h2 className="section-heading">Getting Started Is Simple</h2>
-            <p className="section-subtext">
-              Three straightforward steps to finding meaningful connections.
-            </p>
-          </div>
-
-          <div className="steps-row">
-            <div className="clean-step-card">
-              <span className="step-badge">Step 1</span>
-              <h3 className="step-title">Create Your Profile</h3>
-              <p className="step-desc">
-                Add your favorite photos, write a quick bio, and select your interests.
+          <div className="referral-box-content">
+            <div className="referral-text-col">
+              <div className="referral-pill">
+                <Gift size={14} color="#F59E0B" />
+                <span>Referral Program</span>
+              </div>
+              <h2>Give 100 Sparks, Get 100 Sparks</h2>
+              <p>
+                Love Snellum? Share your unique referral link with friends. Whenever a friend joins
+                and verifies their profile, both of you receive 100 free Sparks instantly!
               </p>
             </div>
-
-            <div className="clean-step-card">
-              <span className="step-badge">Step 2</span>
-              <h3 className="step-title">Discover Matches</h3>
-              <p className="step-desc">
-                Browse nearby members, like profiles that catch your interest, and see who likes you back.
-              </p>
-            </div>
-
-            <div className="clean-step-card">
-              <span className="step-badge">Step 3</span>
-              <h3 className="step-title">Start the Conversation</h3>
-              <p className="step-desc">
-                Break the ice in chat and arrange a safe public coffee date when you're ready.
-              </p>
+            <div className="referral-action-col">
+              <button
+                type="button"
+                className="btn-share-referral"
+                onClick={handleShareReferral}
+              >
+                <Share2 size={16} />
+                <span>Share Invite Link</span>
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Community Stories */}
-      <section className="landing-section" id="community">
-        <div className="landing-container">
-          <div className="section-head">
-            <span className="section-tag">Community</span>
-            <h2 className="section-heading">Real Stories From Members</h2>
-            <p className="section-subtext">
-              People who met someone special through Snellum.
-            </p>
-          </div>
-
-          <div className="stories-grid">
-            <div className="story-card">
-              <p className="story-text">
-                "What I appreciated most was how clear and straightforward the app is. No confusing gimmicks. We matched, started talking about music, and had our first coffee two days later."
-              </p>
-              <div className="story-author-bar">
-                <img
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80"
-                  alt="Brian & Maya"
-                  className="story-avatar"
-                />
-                <div>
-                  <div className="story-name">Brian & Maya</div>
-                  <div className="story-loc">Lilongwe</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="story-card">
-              <p className="story-text">
-                "Profile verification gave me peace of mind. Knowing that you're talking to a verified individual makes meeting up in person so much more comfortable."
-              </p>
-              <div className="story-author-bar">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
-                  alt="Tadala M."
-                  className="story-avatar"
-                />
-                <div>
-                  <div className="story-name">Tadala M.</div>
-                  <div className="story-loc">Blantyre</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="story-card">
-              <p className="story-text">
-                "Clean design, quick load times, and easy chat. It simply works the way a modern dating application should work."
-              </p>
-              <div className="story-author-bar">
-                <img
-                  src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80"
-                  alt="Alinafe P."
-                  className="story-avatar"
-                />
-                <div>
-                  <div className="story-name">Alinafe P.</div>
-                  <div className="story-loc">Mzuzu</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Call To Action */}
+      {/* 8. Call To Action */}
       <section className="landing-cta">
         <div className="landing-container">
           <div className="cta-inner-box">
@@ -458,33 +449,72 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. Clean Minimal Footer */}
+      {/* 9. Clean Minimal Footer */}
       <footer className="landing-footer">
         <div className="landing-container">
           <div className="footer-top">
-            <div className="landing-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div
+              className="landing-brand"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
               <div className="brand-icon-wrap">
-                <img src="/newlogo.png" alt="Snellum Logo" onError={(e) => { e.target.src = '/logo.png'; }} />
+                <img
+                  src="/newlogo.png"
+                  alt="Snellum Logo"
+                  onError={(e) => {
+                    e.target.src = '/logo.png';
+                  }}
+                />
               </div>
               <span className="brand-name">Snellum</span>
             </div>
 
             <nav className="footer-nav">
               <a href="#about">About</a>
-              <a href="#features">Features</a>
-              <a href="#how-it-works">How It Works</a>
-              <a href="#community">Community</a>
+              <a href="#profiles">Singles</a>
+              <a href="#events">Singles Events</a>
+              <a href="#blog">Dating Tips</a>
+              <a href="#pricing">VIP Pricing</a>
               <a onClick={() => handleNavigate('signin')}>Sign In</a>
               <a onClick={() => handleNavigate('signup')}>Create Account</a>
             </nav>
           </div>
 
           <div className="footer-bottom">
-            <span>© {new Date().getFullYear()} Snellum. All rights reserved.</span>
-            <span>Crafted for genuine human connections.</span>
+            <span>© {new Date().getFullYear()} Snellum Dating Malawi. All rights reserved.</span>
+            <span>Direct Web Payments Powered by Stripe. Bypassing in-app store commissions.</span>
           </div>
         </div>
       </footer>
+
+      {/* Public Profile Modal */}
+      <PublicProfileModal
+        isOpen={!!selectedPublicProfile}
+        onClose={() => setSelectedPublicProfile(null)}
+        profile={selectedPublicProfile}
+        onJoinAction={handleNavigate}
+        isAuthenticated={!!user}
+      />
+
+      {/* Stripe Direct Web Checkout Modal */}
+      <StripeCheckoutModal
+        isOpen={!!selectedStripePlan}
+        onClose={() => setSelectedStripePlan(null)}
+        itemType="subscription"
+        itemData={selectedStripePlan}
+        billingCycle="monthly"
+      />
+
+      {/* Social & Referral Share Modal */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        title="Invite Friends to Snellum"
+        text="Join me on Snellum - The modern dating platform for meaningful connections. Claim 100 free Sparks on sign up:"
+        url={referralLink}
+        isReferral={true}
+        referralCode={shareService.getUserReferralCode(user)}
+      />
     </div>
   );
 }
