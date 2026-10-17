@@ -8,25 +8,19 @@ import {
   Menu,
   X,
   MapPin,
-  Calendar,
   Lock,
-  Compass,
-  MessageCircle,
   Sparkles,
-  Video,
-  Crown,
   CheckCircle2,
   Gift,
   Share2,
   CreditCard,
-  Zap,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../common/ThemeToggle';
 import DatingEventsSection from '../events/DatingEventsSection';
 import DatingTipsSection from '../blog/DatingTipsSection';
 import PublicProfileModal from '../profile/PublicProfileModal';
-import StripeCheckoutModal from '../premium/StripeCheckoutModal';
+
 import ShareModal from '../common/ShareModal';
 import { PUBLIC_PROFILES } from '../../data/publicProfilesData';
 import { paymentService } from '../../services/paymentService';
@@ -40,7 +34,7 @@ export default function LandingPage() {
 
   // Modals for deep linking and interactions
   const [selectedPublicProfile, setSelectedPublicProfile] = useState(null);
-  const [selectedStripePlan, setSelectedStripePlan] = useState(null);
+
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const activeHeroProfile = PUBLIC_PROFILES[profileIndex] || PUBLIC_PROFILES[0];
@@ -275,75 +269,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Discoverable Public Profiles Section */}
-      <section className="landing-section" id="profiles">
-        <div className="landing-container">
-          <div className="section-head">
-            <span className="section-tag">Public Profiles</span>
-            <h2 className="section-heading">Meet Verified Singles in Malawi</h2>
-            <p className="section-subtext">
-              Real people, genuine ambitions, and verified selfies. Browse public preview profiles or
-              create your own in under 2 minutes.
-            </p>
-          </div>
-
-          <div className="public-profiles-grid">
-            {PUBLIC_PROFILES.map((p) => (
-              <div
-                key={p.slug}
-                className="public-single-card"
-                onClick={() => setSelectedPublicProfile(p)}
-              >
-                <div className="public-single-thumb">
-                  <img src={p.photos[0]} alt={p.name} loading="lazy" />
-                  <div className="public-thumb-overlay">
-                    <span className="location-pill">
-                      <MapPin size={11} /> {p.city}
-                    </span>
-                  </div>
-                </div>
-                <div className="public-single-info">
-                  <div className="public-single-header">
-                    <h4>{p.name}, {p.age}</h4>
-                    <ShieldCheck size={16} color="#FF4D85" />
-                  </div>
-                  <span className="occupation-text">{p.occupation}</span>
-                  <p className="bio-snippet">{p.bio}</p>
-                  <div className="public-tags-row">
-                    {p.tags.slice(0, 3).map((t, idx) => (
-                      <span key={idx} className="small-tag">{t}</span>
-                    ))}
-                  </div>
-                  <div className="public-card-action">
-                    <button type="button" className="btn-view-profile">
-                      View Profile & Connect <ArrowRight size={13} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* 4. Search-Indexed Singles Events & Mixers */}
       <DatingEventsSection onNavigateAuth={handleNavigate} />
 
       {/* 5. Dating Tips & Advice Blog */}
       <DatingTipsSection onNavigateAuth={handleNavigate} />
 
-      {/* 6. Direct Web Pricing Section (Stripe 30% Savings) */}
+      {/* 6. Pricing Section */}
       <section className="landing-section" id="pricing">
         <div className="landing-container">
           <div className="section-head">
             <div className="section-kicker">
               <CreditCard size={14} color="#10B981" />
-              <span>Direct Web Monetization • Stripe Integration</span>
+              <span>Pricing</span>
             </div>
-            <h2 className="section-heading">Direct Web VIP Rates (Save 30%)</h2>
+            <h2 className="section-heading">Simple, transparent pricing</h2>
             <p className="section-subtext">
-              By purchasing your VIP membership directly on our secure web platform, you bypass the
-              30% Apple & Google in-app fees. Enjoy instant activation, Apple Pay, Google Pay, and cards!
+              Upgrade whenever you like. Subscribing on the web costs 30% less than paying
+              through the App Store or Google Play.
             </p>
           </div>
 
@@ -354,25 +297,20 @@ export default function LandingPage() {
                 className={`landing-pricing-card ${plan.popular ? 'popular' : ''}`}
               >
                 {plan.popular && <span className="popular-badge">Most Popular</span>}
+
                 <div className="pricing-header">
-                  <h3>{plan.name}</h3>
-                  <div className="pricing-rates">
+                  <span className="pricing-tier">{plan.name}</span>
+                  <div className="pricing-price">
                     <strong className="rate-amount">{plan.usdMonthlyPrice}</strong>
-                    <span className="rate-period">/month</span>
+                    <span className="rate-period">/ month</span>
                   </div>
-                  <div className="mwk-sub-rate">
-                    <span>{plan.monthlyPrice}</span>
-                    <span className="save-badge">Save 30% on Web</span>
-                  </div>
-                  <div className="app-store-comparison">
-                    <span>App Store Price: <s>{plan.appStoreMonthlyPrice}</s></span>
-                  </div>
+                  <span className="pricing-local">or {plan.monthlyPrice} / month</span>
                 </div>
 
                 <ul className="pricing-features">
                   {plan.features.map((feat, idx) => (
                     <li key={idx}>
-                      <CheckCircle2 size={14} color="#10B981" />
+                      <CheckCircle2 size={15} color="#10B981" />
                       <span>{feat}</span>
                     </li>
                   ))}
@@ -381,23 +319,18 @@ export default function LandingPage() {
                 <button
                   type="button"
                   className={`btn-pricing-cta ${plan.popular ? 'btn-primary' : 'btn-ghost'}`}
-                  onClick={() => setSelectedStripePlan(plan)}
+                  onClick={() => handleNavigate('signup')}
                 >
-                  <CreditCard size={15} />
-                  <span>Subscribe via Stripe</span>
+                  Get started
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="payment-security-callout">
-            <div className="security-badges">
-              <span>🔒 256-Bit SSL Encrypted</span>
-              <span> Apple Pay Ready</span>
-              <span>GPay Google Pay</span>
-              <span>💳 Visa / Mastercard / Amex</span>
-            </div>
-          </div>
+          <p className="pricing-note">
+            <Lock size={13} />
+            <span>Secure checkout · Cancel anytime · Prices shown in USD</span>
+          </p>
         </div>
       </section>
 
@@ -494,15 +427,6 @@ export default function LandingPage() {
         profile={selectedPublicProfile}
         onJoinAction={handleNavigate}
         isAuthenticated={!!user}
-      />
-
-      {/* Stripe Direct Web Checkout Modal */}
-      <StripeCheckoutModal
-        isOpen={!!selectedStripePlan}
-        onClose={() => setSelectedStripePlan(null)}
-        itemType="subscription"
-        itemData={selectedStripePlan}
-        billingCycle="monthly"
       />
 
       {/* Social & Referral Share Modal */}
