@@ -179,7 +179,7 @@ export default function StripeCheckoutModal({
         <div className="stripe-header">
           <div className="stripe-brand-badge">
             <span className="stripe-logo-text">stripe</span>
-            <span className="direct-web-tag">Direct Web Checkout</span>
+            <span className="direct-web-tag">Secure Checkout</span>
           </div>
           <button type="button" className="btn-icon" onClick={onClose} aria-label="Close Checkout">
             <X size={18} />
@@ -194,8 +194,7 @@ export default function StripeCheckoutModal({
             </div>
             <h3>Payment Confirmed!</h3>
             <p className="success-desc">
-              Your direct web payment was securely authorized via Stripe. You saved 30% by paying
-              directly on the web!
+              Your payment was securely authorized via Stripe. Your perks are now active!
             </p>
 
             <div className="receipt-summary-card">
@@ -206,10 +205,6 @@ export default function StripeCheckoutModal({
               <div className="receipt-row">
                 <span>Amount Paid</span>
                 <strong className="receipt-total">{priceUSD} ({mwkPrice})</strong>
-              </div>
-              <div className="receipt-row">
-                <span>App Store Markup Saved</span>
-                <span className="savings-green">Bypassed 30% App Store cut</span>
               </div>
               <div className="receipt-row">
                 <span>Transaction Ref</span>
@@ -228,14 +223,14 @@ export default function StripeCheckoutModal({
         ) : (
           /* Checkout View */
           <div className="checkout-form-view">
-            {/* Direct Web Bypass Banner */}
+            {/* Secure Checkout Banner */}
             <div className="web-bypass-banner">
               <div className="bypass-tag">
                 <Sparkles size={14} color="#F59E0B" />
-                <span>30% Web Exclusive Savings</span>
+                <span>Instant Activation</span>
               </div>
               <p>
-                Bypassing Apple App Store & Google Play in-app fees gives you direct access at lowest prices + instant bonus Sparks!
+                Secure 256-bit encrypted checkout powered by Stripe. Your VIP perks or Sparks will be applied immediately!
               </p>
             </div>
 
@@ -246,7 +241,7 @@ export default function StripeCheckoutModal({
               </div>
               <div className="item-details-col">
                 <h4>{itemName}</h4>
-                <span>Direct Web Price (vs {appStorePriceUSD} in app stores)</span>
+                <span>{isSub ? 'VIP Subscription' : 'Sparks Package'}</span>
               </div>
               <div className="item-price-col">
                 <strong>{priceUSD}</strong>

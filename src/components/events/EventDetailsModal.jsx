@@ -144,7 +144,7 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
                 <Ticket size={18} color="#10B981" />
                 <div>
                   <strong>{event.price}</strong>
-                  <span>Direct Web Ticket Price</span>
+                  <span>Ticket Price</span>
                 </div>
               </div>
             </div>

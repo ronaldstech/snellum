@@ -1,33 +1,22 @@
 import React, { useState } from 'react';
 import {
-  Sparkles,
+  Crown,
   Zap,
   CheckCircle2,
-  Crown,
-  ShieldCheck,
   X,
   CreditCard,
-  Smartphone,
-  ChevronRight,
-  ArrowRight,
-  Gift,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { paymentService } from '../../services/paymentService';
 import StripeCheckoutModal from './StripeCheckoutModal';
-import ShareModal from '../common/ShareModal';
-import { shareService } from '../../services/shareService';
 import '../../styles/premium.css';
 
 export default function PremiumStoreModal({ isOpen, onClose }) {
-  const { user, userProfile, showToast } = useAuth();
-  const [activeTab, setActiveTab] = useState('subscriptions'); // 'subscriptions' | 'sparks' | 'referrals'
-  const [billingCycle, setBillingCycle] = useState('monthly'); // 'weekly' | 'monthly'
-  const [selectedPlan, setSelectedPlan] = useState('premium');
-  const [paymentMode, setPaymentMode] = useState('stripe'); // 'stripe' | 'mobile_money'
-  const [selectedOperator, setSelectedOperator] = useState('airtel_mw');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const { userProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState('memberships'); // 'memberships' | 'sparks'
+  const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'weekly'
 
   // Stripe Checkout Modal state
   const [stripeModalConfig, setStripeModalConfig] = useState({
@@ -37,16 +26,10 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
     billingCycle: 'monthly',
   });
 
-  // Share / Referral Modal state
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-
   if (!isOpen) return null;
 
   const subscriptionPlans = paymentService.getSubscriptionPlans();
   const sparkPackages = paymentService.getSparkPackages();
-  const operators = paymentService.getMobileOperators();
-  const userReferralCode = shareService.getUserReferralCode(user);
-  const referralLink = shareService.getReferralLink(user);
 
   const handleOpenStripeSub = (plan) => {
     setStripeModalConfig({
@@ -66,313 +49,201 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
     });
   };
 
-  const handleMobileMoneyPurchase = async () => {
-    if (!phoneNumber) {
-      showToast('Please enter your mobile phone number', 'error');
-      return;
-    }
-    setProcessing(true);
-    try {
-      await new Promise((res) => setTimeout(res, 1200));
-      if (activeTab === 'subscriptions') {
-        if (user?.uid) {
-          await paymentService.activateSubscription(user.uid, selectedPlan, billingCycle);
-        }
-        showToast('🎉 Mobile money prompt sent! Subscription activated.', 'success');
-      } else {
-        const pkg = sparkPackages[1];
-        if (user?.uid) {
-          await paymentService.addSparksToAccount(user.uid, pkg.sparks);
-        }
-        showToast(`⚡ Added ${pkg.sparks} Sparks to your account!`, 'success');
-      }
-      onClose();
-    } catch (err) {
-      showToast('Mobile money processing error', 'error');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   return (
     <>
-      <div className="modal-backdrop-fixed animate-fade-in" onClick={onClose}>
-        <div className="premium-modal-card" onClick={(e) => e.stopPropagation()}>
-          {/* Header */}
-          <div className="premium-modal-header">
-            <div className="premium-title-group">
-              <Crown size={24} color="#F59E0B" />
+      <div className="drawer-backdrop-fixed animate-fade-in" onClick={onClose}>
+        <aside
+          className="premium-drawer"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="VIP Memberships & Sparks Store"
+        >
+          {/* 1. Header */}
+          <div className="premium-drawer-header">
+            <div className="premium-drawer-title-group">
+              <div className="premium-drawer-icon">
+                <Crown size={20} />
+              </div>
               <div>
-                <h3>Snellum VIP & Sparks Store</h3>
-                <span>Direct Web Rates: Save 30% vs App Store & Google Play</span>
+                <h3>VIP & Sparks</h3>
+                <p>Unlock VIP features & instant matches</p>
               </div>
             </div>
-            <button type="button" className="btn-icon" onClick={onClose} aria-label="Close Store">
-              <X size={20} />
+            <button
+              type="button"
+              className="drawer-close-btn"
+              onClick={onClose}
+              aria-label="Close Store"
+            >
+              <X size={18} />
             </button>
           </div>
 
-          {/* Web Direct Rate Promotion Badge */}
-          <div className="web-rate-guarantee-pill">
-            <Sparkles size={14} color="#10B981" />
-            <span>0% App Store markup applied on web checkout. Direct Stripe & Card savings.</span>
-          </div>
-
-          {/* Store Tabs */}
-          <div className="store-tabs-nav">
-            <button
-              type="button"
-              className={`store-tab ${activeTab === 'subscriptions' ? 'active' : ''}`}
-              onClick={() => setActiveTab('subscriptions')}
-            >
-              <Crown size={15} /> VIP Memberships
-            </button>
-            <button
-              type="button"
-              className={`store-tab ${activeTab === 'sparks' ? 'active' : ''}`}
-              onClick={() => setActiveTab('sparks')}
-            >
-              <Zap size={15} /> Sparks Credits
-            </button>
-            <button
-              type="button"
-              className={`store-tab ${activeTab === 'referrals' ? 'active' : ''}`}
-              onClick={() => setActiveTab('referrals')}
-            >
-              <Gift size={15} /> Earn Free Sparks
-            </button>
-          </div>
-
-          {/* Payment Method Switcher (Stripe Direct vs Mobile Money) */}
-          <div className="payment-gateway-toggle">
-            <span className="gateway-label">Payment Method:</span>
-            <div className="gateway-options">
+          {/* 2. Simplified Two Tabs: VIP Memberships & Sparks */}
+          <div className="premium-drawer-tabs-wrap">
+            <div className="premium-drawer-tabs">
               <button
                 type="button"
-                className={`gateway-btn ${paymentMode === 'stripe' ? 'active' : ''}`}
-                onClick={() => setPaymentMode('stripe')}
+                className={`premium-drawer-tab ${activeTab === 'memberships' ? 'active' : ''}`}
+                onClick={() => setActiveTab('memberships')}
               >
-                <CreditCard size={14} /> Stripe (Cards & Apple/Google Pay)
+                <Crown size={15} /> VIP Memberships
               </button>
               <button
                 type="button"
-                className={`gateway-btn ${paymentMode === 'mobile_money' ? 'active' : ''}`}
-                onClick={() => setPaymentMode('mobile_money')}
+                className={`premium-drawer-tab ${activeTab === 'sparks' ? 'active' : ''}`}
+                onClick={() => setActiveTab('sparks')}
               >
-                <Smartphone size={14} /> Mobile Money (Airtel / TNM)
+                <Zap size={15} /> Sparks
               </button>
             </div>
           </div>
 
-          {/* VIP Plans View */}
-          {activeTab === 'subscriptions' && (
-            <div className="subscriptions-view">
-              {/* Billing Toggle */}
-              <div className="billing-toggle-container">
-                <button
-                  type="button"
-                  className={`billing-btn ${billingCycle === 'weekly' ? 'active' : ''}`}
-                  onClick={() => setBillingCycle('weekly')}
-                >
-                  Weekly
-                </button>
-                <button
-                  type="button"
-                  className={`billing-btn ${billingCycle === 'monthly' ? 'active' : ''}`}
-                  onClick={() => setBillingCycle('monthly')}
-                >
-                  Monthly <span className="save-tag">Save 30%</span>
-                </button>
-              </div>
+          {/* 3. Drawer Scrollable Body */}
+          <div className="premium-drawer-body">
+            {/* VIP Perks Highlight Callout */}
+            <div className="web-savings-callout">
+              <Sparkles size={14} />
+              <span>Get unlimited likes, read receipts, and priority matching.</span>
+            </div>
 
-              {/* Plans Grid */}
-              <div className="plans-grid">
-                {subscriptionPlans.map((plan) => {
-                  const isPlanSelected = selectedPlan === plan.id;
-                  const priceStr =
-                    paymentMode === 'stripe'
-                      ? (billingCycle === 'monthly' ? plan.usdMonthlyPrice : plan.usdWeeklyPrice)
-                      : (billingCycle === 'monthly' ? plan.monthlyPrice : plan.weeklyPrice);
-                  const subPeriod = billingCycle === 'monthly' ? 'mo' : 'wk';
+            {/* TAB 1: VIP Memberships */}
+            {activeTab === 'memberships' && (
+              <>
+                {/* Billing Cycle Switcher */}
+                <div className="drawer-billing-switch">
+                  <button
+                    type="button"
+                    className={`drawer-billing-btn ${billingCycle === 'monthly' ? 'active' : ''}`}
+                    onClick={() => setBillingCycle('monthly')}
+                  >
+                    Monthly <span className="drawer-save-badge">Popular</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`drawer-billing-btn ${billingCycle === 'weekly' ? 'active' : ''}`}
+                    onClick={() => setBillingCycle('weekly')}
+                  >
+                    Weekly
+                  </button>
+                </div>
 
-                  return (
+                {/* Plans List */}
+                <div className="drawer-plans-list">
+                  {subscriptionPlans.map((plan) => {
+                    const priceDisplay =
+                      billingCycle === 'monthly' ? plan.usdMonthlyPrice : plan.usdWeeklyPrice;
+                    const localPriceDisplay =
+                      billingCycle === 'monthly' ? plan.monthlyPrice : plan.weeklyPrice;
+                    const periodLabel = billingCycle === 'monthly' ? '/mo' : '/wk';
+
+                    return (
+                      <div
+                        key={plan.id}
+                        className={`drawer-plan-card ${plan.popular ? 'popular' : ''}`}
+                      >
+                        {plan.popular && (
+                          <span className="drawer-plan-popular-badge">Most Popular</span>
+                        )}
+
+                        <div className="drawer-plan-header">
+                          <h4 className="drawer-plan-name">{plan.name}</h4>
+                          <div className="drawer-plan-price-wrap">
+                            <span className="drawer-plan-price">{priceDisplay}</span>
+                            <span className="drawer-plan-period">{periodLabel}</span>
+                            <div className="drawer-plan-sub-price">or {localPriceDisplay}</div>
+                          </div>
+                        </div>
+
+                        <ul className="drawer-plan-features">
+                          {plan.features.map((feat, idx) => (
+                            <li key={idx}>
+                              <CheckCircle2 size={14} color="#10B981" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <button
+                          type="button"
+                          className={`drawer-plan-btn ${plan.popular ? 'btn-vip-highlight' : ''}`}
+                          onClick={() => handleOpenStripeSub(plan)}
+                        >
+                          <CreditCard size={15} /> Upgrade to {plan.name}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* TAB 2: Sparks */}
+            {activeTab === 'sparks' && (
+              <>
+                {/* Current Sparks Balance Hero */}
+                <div className="sparks-balance-hero">
+                  <div className="sparks-balance-icon-wrap">
+                    <Zap size={24} color="#F59E0B" />
+                  </div>
+                  <div className="sparks-balance-meta">
+                    <span>Your Current Balance</span>
+                    <h4>{userProfile?.sparks || 100} Sparks</h4>
+                  </div>
+                </div>
+
+                <p className="sparks-use-tip">
+                  Use Sparks for instant profile boosts, sending Super Likes, and sending virtual gifts in chats.
+                </p>
+
+                {/* Packages List */}
+                <div className="sparks-packages-list">
+                  {sparkPackages.map((pkg) => (
                     <div
-                      key={plan.id}
-                      className={`plan-card ${isPlanSelected ? 'selected' : ''} ${
-                        plan.popular ? 'popular' : ''
-                      }`}
-                      onClick={() => setSelectedPlan(plan.id)}
+                      key={pkg.id}
+                      className={`spark-card ${pkg.popular ? 'popular' : ''}`}
                     >
-                      {plan.popular && <span className="popular-badge">Most Popular</span>}
-                      <h4>{plan.name}</h4>
-                      <div className="plan-price">
-                        <strong>{priceStr}</strong>
-                        <span>/{subPeriod}</span>
+                      <div className="spark-card-left">
+                        <div className="spark-card-icon">⚡</div>
+                        <div className="spark-card-info">
+                          <h4>
+                            {pkg.sparks} Sparks
+                            {pkg.bonus && (
+                              <span className="spark-bonus-tag">{pkg.bonus}</span>
+                            )}
+                          </h4>
+                          <div className="spark-card-price-sub">
+                            {pkg.usdPrice} · ({pkg.price})
+                          </div>
+                        </div>
                       </div>
 
-                      {paymentMode === 'stripe' && plan.appStoreMonthlyPrice && (
-                        <div className="web-discount-note">
-                          <span>App Store: <s>{plan.appStoreMonthlyPrice}</s></span>
-                          <span className="green-save">Save 30%</span>
-                        </div>
-                      )}
-
-                      <ul className="plan-features-list">
-                        {plan.features.map((feat, idx) => (
-                          <li key={idx}>
-                            <CheckCircle2 size={13} color="#10B981" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      {paymentMode === 'stripe' ? (
-                        <button
-                          type="button"
-                          className={`btn-plan-select ${isPlanSelected ? 'btn-primary' : 'btn-ghost'}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenStripeSub(plan);
-                          }}
-                        >
-                          <CreditCard size={14} /> Pay via Stripe
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`btn-plan-select ${isPlanSelected ? 'btn-primary' : 'btn-ghost'}`}
-                          onClick={() => setSelectedPlan(plan.id)}
-                        >
-                          {isPlanSelected ? 'Selected' : 'Select'}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {paymentMode === 'mobile_money' && (
-                <div className="mobile-money-checkout-box">
-                  <div className="mm-inputs">
-                    <select
-                      value={selectedOperator}
-                      onChange={(e) => setSelectedOperator(e.target.value)}
-                      className="mm-select"
-                    >
-                      <option value="airtel_mw">📱 Airtel Money (MW)</option>
-                      <option value="tnm_mpamba">🇲🇼 TNM Mpamba (MW)</option>
-                    </select>
-                    <input
-                      type="tel"
-                      placeholder="e.g. 0991234567"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="mm-phone-input"
-                    />
-                    <button
-                      type="button"
-                      className="btn-primary"
-                      onClick={handleMobileMoneyPurchase}
-                      disabled={processing}
-                    >
-                      {processing ? 'Processing...' : 'Pay with Mobile Money'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Sparks / Credits View */}
-          {activeTab === 'sparks' && (
-            <div className="sparks-view">
-              <div className="sparks-balance-card">
-                <Zap size={24} color="#F59E0B" />
-                <div>
-                  <span>Current Balance</span>
-                  <h4>{userProfile?.sparks || 100} Sparks</h4>
-                </div>
-              </div>
-
-              <div className="sparks-grid">
-                {sparkPackages.map((pkg) => (
-                  <div key={pkg.id} className="spark-package-card">
-                    <div className="spark-icon-circle">⚡</div>
-                    <h4>{pkg.sparks} Sparks</h4>
-                    {pkg.bonus && <span className="bonus-pill">{pkg.bonus}</span>}
-                    <span className="spark-cost">
-                      {paymentMode === 'stripe' ? `${pkg.usdPrice} (${pkg.price})` : pkg.price}
-                    </span>
-
-                    {paymentMode === 'stripe' ? (
                       <button
                         type="button"
-                        className="btn-primary w-full"
+                        className="spark-buy-btn"
                         onClick={() => handleOpenStripeSparks(pkg)}
                       >
-                        <CreditCard size={14} /> Buy with Stripe
+                        <CreditCard size={13} /> Buy
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn-primary w-full"
-                        onClick={() => {
-                          setSelectedOperator('airtel_mw');
-                          handleMobileMoneyPurchase();
-                        }}
-                        disabled={processing}
-                      >
-                        Purchase
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Free Sparks / Referral Tab */}
-          {activeTab === 'referrals' && (
-            <div className="referrals-store-view">
-              <div className="referral-banner-hero">
-                <div className="referral-icon-badge">
-                  <Gift size={32} color="#F59E0B" />
+                    </div>
+                  ))}
                 </div>
-                <h3>Give 100 Sparks, Get 100 Sparks</h3>
-                <p>
-                  Invite single friends to Snellum web. When they create their verified profile using
-                  your referral link, you both receive 100 sparks instantly!
-                </p>
-                <div className="referral-code-display">
-                  <span>Your Code:</span>
-                  <strong>{userReferralCode}</strong>
-                </div>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => setShareModalOpen(true)}
-                >
-                  <Sparkles size={16} /> Share My Referral Link
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Operators footer */}
-          <div className="payment-operators-footer">
-            <span>Direct Web Checkout Supported:</span>
-            <div className="operators-chips">
-              <span className="operator-chip">💳 Stripe Cards (Visa/Mastercard)</span>
-              <span className="operator-chip"> Apple Pay</span>
-              <span className="operator-chip">GPay Google Pay</span>
-              <span className="operator-chip">📱 Airtel Money</span>
-              <span className="operator-chip">🇲🇼 TNM Mpamba</span>
-            </div>
+              </>
+            )}
           </div>
-        </div>
+
+          {/* 4. Footer */}
+          <div className="premium-drawer-footer">
+            <span className="drawer-secure-note">
+              <ShieldCheck size={14} color="#10B981" />
+              Safe & secure checkout · Instant activation · Cancel anytime
+            </span>
+          </div>
+        </aside>
       </div>
 
-      {/* Stripe Checkout Modal */}
+      {/* Stripe Web Checkout Modal */}
       <StripeCheckoutModal
         isOpen={stripeModalConfig.isOpen}
         onClose={() =>
@@ -381,17 +252,6 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
         itemType={stripeModalConfig.itemType}
         itemData={stripeModalConfig.itemData}
         billingCycle={stripeModalConfig.billingCycle}
-      />
-
-      {/* Share / Referral Modal */}
-      <ShareModal
-        isOpen={shareModalOpen}
-        onClose={() => setShareModalOpen(false)}
-        title="Invite Friends to Snellum"
-        text="Join me on Snellum - The modern dating platform for meaningful connections. Use my invite link to get 100 Free Sparks!"
-        url={referralLink}
-        isReferral={true}
-        referralCode={userReferralCode}
       />
     </>
   );

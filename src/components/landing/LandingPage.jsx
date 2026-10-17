@@ -186,8 +186,8 @@ export default function LandingPage() {
                   <span className="stat-label">Verified Members</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-number">Save 30%</span>
-                  <span className="stat-label">Direct Web Rates</span>
+                  <span className="stat-number">10k+</span>
+                  <span className="stat-label">Active Singles</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-number">Singles Mixers</span>
@@ -285,8 +285,7 @@ export default function LandingPage() {
             </div>
             <h2 className="section-heading">Simple, transparent pricing</h2>
             <p className="section-subtext">
-              Upgrade whenever you like. Subscribing on the web costs 30% less than paying
-              through the App Store or Google Play.
+              Upgrade whenever you like with simple, flexible plans designed for genuine relationships.
             </p>
           </div>
 
@@ -415,7 +414,6 @@ export default function LandingPage() {
 
           <div className="footer-bottom">
             <span>© {new Date().getFullYear()} Snellum Dating Malawi. All rights reserved.</span>
-            <span>Direct Web Payments Powered by Stripe. Bypassing in-app store commissions.</span>
           </div>
         </div>
       </footer>
