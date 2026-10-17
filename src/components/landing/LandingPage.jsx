@@ -86,7 +86,7 @@ export default function LandingPage() {
 
             <ul className="landing-nav-links">
               <li><a href="#about">About</a></li>
-              <li><a href="#profiles">Singles</a></li>
+
               <li><a href="#events">Singles Events</a></li>
               <li><a href="#blog">Dating Tips</a></li>
               <li><a href="#pricing">VIP Pricing</a></li>
@@ -117,7 +117,7 @@ export default function LandingPage() {
         <div className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-nav-links">
             <a href="#about" onClick={() => setMobileMenuOpen(false)}>About</a>
-            <a href="#profiles" onClick={() => setMobileMenuOpen(false)}>Singles</a>
+
             <a href="#events" onClick={() => setMobileMenuOpen(false)}>Singles Events</a>
             <a href="#blog" onClick={() => setMobileMenuOpen(false)}>Dating Tips</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>VIP Pricing</a>
@@ -404,7 +404,7 @@ export default function LandingPage() {
 
             <nav className="footer-nav">
               <a href="#about">About</a>
-              <a href="#profiles">Singles</a>
+
               <a href="#events">Singles Events</a>
               <a href="#blog">Dating Tips</a>
               <a href="#pricing">VIP Pricing</a>
