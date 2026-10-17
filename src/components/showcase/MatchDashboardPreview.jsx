@@ -7,13 +7,12 @@ import {
   User,
   SlidersHorizontal,
   Bell,
-  Zap,
+  Crown,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
 import SwipeView from '../swipe/SwipeView';
 import { countActiveFilters } from '../../utils/discoveryFilters';
-import DiscoveryFiltersSidebar from '../swipe/DiscoveryFiltersSidebar';
 import DiscoveryFiltersModal from '../swipe/DiscoveryFiltersModal';
 import ProfileSidebar from '../profile/ProfileSidebar';
 import ExploreScreen from '../explore/ExploreScreen';
@@ -136,53 +135,54 @@ export default function MatchDashboardPreview() {
 
           {/* Right User Bar */}
           <div className="dashboard-user-bar">
-            {/* Sparks & VIP Store Button */}
+            {/* Premium Button */}
             <button
               type="button"
-              className="btn-sparks-badge"
+              className="header-action-btn btn-header-premium"
               onClick={() => setShowPremiumStore(true)}
-              title="Sparks & VIP Store"
+              title="Upgrade to Premium & VIP Plans"
+              aria-label="Upgrade to Premium & VIP Plans"
             >
-              <Zap size={15} color="#F59E0B" />
-              <span>{userProfile?.sparks || 100}</span>
+              <Crown size={15} />
+              <span className="btn-header-premium-label">
+                {userProfile?.isPremium ? 'VIP Active' : 'Premium'}
+              </span>
             </button>
 
             {/* Discovery Filters */}
             <button
               type="button"
-              onClick={() => setShowFilters(true)}
-              className="btn-ghost dashboard-filters-button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className={`header-action-btn icon-only dashboard-filters-button ${showFilters ? 'active' : ''}`}
               title="Discovery filters"
+              aria-label="Discovery filters"
+              aria-expanded={showFilters}
             >
-              <SlidersHorizontal size={15} />
+              <SlidersHorizontal size={16} />
               {activeFilterCount > 0 && (
-                <span className="swipe-filter-count">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>
+                <span className="header-btn-badge">{activeFilterCount > 9 ? '9+' : activeFilterCount}</span>
               )}
             </button>
 
             {/* Notifications */}
             <button
               type="button"
-              className="btn-ghost notif-btn"
+              className={`header-action-btn icon-only notif-btn ${showNotifications ? 'active' : ''}`}
               onClick={() => setShowNotifications(true)}
               title="Notifications"
+              aria-label="Notifications"
             >
               <Bell size={16} />
               <span className="notif-badge-dot" />
             </button>
 
             {/* Profile Avatar Pill → Profile Sidebar Drawer */}
-            <div
-              className="user-pill"
+            <button
+              type="button"
+              className={`header-action-btn user-pill ${activeTab === 'profile' || showProfile ? 'active' : ''}`}
               onClick={() => setShowProfile(true)}
-              style={{
-                cursor: 'pointer',
-                border:
-                  activeTab === 'profile' || showProfile
-                    ? '1px solid var(--primary)'
-                    : '1px solid var(--border-light)',
-              }}
               title="View Profile"
+              aria-label="View Profile"
             >
               <img
                 src={
@@ -195,7 +195,7 @@ export default function MatchDashboardPreview() {
               <span className="user-pill-name">
                 {userProfile?.displayName || user?.displayName || 'Member'}
               </span>
-            </div>
+            </button>
           </div>
         </div>
       </header>
@@ -204,12 +204,10 @@ export default function MatchDashboardPreview() {
       <main className={`dashboard-main tab-${activeTab}`}>
         {activeTab === 'discover' && (
           <div className="discover-shell">
-            <DiscoveryFiltersSidebar onOpenPremium={() => setShowPremiumStore(true)} />
             <div className="discover-main">
               <SwipeView
                 onOpenPremium={() => setShowPremiumStore(true)}
                 onStartChat={handleStartChatWithPartner}
-                showFloatingFilters={false}
               />
             </div>
           </div>
