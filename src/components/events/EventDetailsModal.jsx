@@ -16,19 +16,23 @@ import { shareService } from '../../services/shareService';
 import { updateSeoMeta } from '../../utils/seo';
 import StripeCheckoutModal from '../premium/StripeCheckoutModal';
 import ShareModal from '../common/ShareModal';
+import { eventsService } from '../../services/eventsService';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/events.css';
 
-export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSuccess }) {
+export default function EventDetailsModal({ isOpen, onClose, event, onNavigateAuth }) {
+  const { user, userProfile, showToast, setPendingEventApplicationId } = useAuth();
   const [stripeOpen, setStripeOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [rsvpd, setRsvpd] = useState(false);
+  const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false);
 
   useEffect(() => {
     if (isOpen && event) {
       // Dynamic SEO and JSON-LD structured data for Google Search Indexing
       updateSeoMeta({
         title: `${event.title} (${event.city}) - Snellum Singles Events`,
-        description: `${event.description.substring(0, 155)}...`,
+        description: `${(event.description || event.subtitle || 'Discover community events with Snellum.').substring(0, 155)}...`,
         image: event.image,
         type: 'event',
         url: shareService.getEventShareLink(event.slug),
@@ -36,8 +40,7 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
           '@context': 'https://schema.org',
           '@type': 'Event',
           name: event.title,
-          startDate: `${event.date}T17:30:00+02:00`,
-          endDate: `${event.date}T21:30:00+02:00`,
+          ...(event.date ? { startDate: `${event.date}T17:30:00+02:00`, endDate: `${event.date}T21:30:00+02:00` } : {}),
           eventStatus: 'https://schema.org/EventScheduled',
           eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
           location: {
@@ -54,7 +57,7 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
           offers: {
             '@type': 'Offer',
             url: window.location.href,
-            price: event.cents ? (event.cents / 100).toFixed(2) : '9.99',
+            price: event.isFree ? '0' : event.cents ? (event.cents / 100).toFixed(2) : '9.99',
             priceCurrency: 'USD',
             availability: 'https://schema.org/InStock',
             validFrom: '2026-01-01T00:00:00+02:00',
@@ -72,6 +75,26 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
   if (!isOpen || !event) return null;
 
   const eventLink = shareService.getEventShareLink(event.slug);
+
+  const handleFreeRsvp = async () => {
+    if (!user?.uid) {
+      setPendingEventApplicationId(event.id);
+      showToast('Sign in to RSVP for this event.', 'info');
+      onNavigateAuth?.('signin');
+      return;
+    }
+
+    setIsSubmittingRsvp(true);
+    try {
+      await eventsService.submitFreeApplication({ event, user, userProfile });
+      setRsvpd(true);
+      showToast(`Your application for ${event.title} was sent.`, 'success');
+    } catch (error) {
+      showToast(error.message || 'Could not complete your RSVP. Please try again.', 'error');
+    } finally {
+      setIsSubmittingRsvp(false);
+    }
+  };
 
   const handleShare = async () => {
     const res = await shareService.shareContent({
@@ -111,7 +134,7 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
             <div className="event-hero-badges">
               <span className="event-category-badge">{event.category}</span>
               <span className="event-spots-badge">
-                <Users size={12} /> {event.spotsLeft} spots remaining
+                <Users size={12} /> {event.spotsLeft ? `${event.spotsLeft} spots remaining` : event.capacity ? `Capacity ${event.capacity}` : 'Join us'}
               </span>
             </div>
             <div className="event-hero-content">
@@ -151,7 +174,7 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
 
             {/* Description */}
             <div className="event-section-block">
-              <h3>About This Mixer</h3>
+              <h3>About This Event</h3>
               <p>{event.description}</p>
             </div>
 
@@ -208,10 +231,11 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
               <button
                 type="button"
                 className="btn-rsvp-primary"
-                onClick={() => setStripeOpen(true)}
+                onClick={event.isFree ? handleFreeRsvp : () => setStripeOpen(true)}
+                disabled={isSubmittingRsvp || rsvpd}
               >
-                <Ticket size={16} />
-                <span>Reserve Ticket ({event.price})</span>
+                {rsvpd ? <CheckCircle2 size={16} /> : <Ticket size={16} />}
+                <span>{rsvpd ? 'Application sent' : isSubmittingRsvp ? 'Sending application…' : event.isFree ? 'Apply for free' : `Reserve Ticket (${event.price})`}</span>
               </button>
             </div>
           </div>
@@ -219,12 +243,12 @@ export default function EventDetailsModal({ isOpen, onClose, event, onRsvpSucces
       </div>
 
       {/* Stripe Checkout for Event Ticket */}
-      <StripeCheckoutModal
+      {!event.isFree && <StripeCheckoutModal
         isOpen={stripeOpen}
         onClose={() => setStripeOpen(false)}
         itemType="event"
         itemData={event}
-      />
+      />}
 
       {/* Share Modal */}
       <ShareModal

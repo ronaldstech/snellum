@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authService, profileService } from '../services/authService';
 import { isFirebaseConfigured } from '../services/firebase';
 import { UserProfile } from '../models/userProfile';
@@ -12,6 +12,17 @@ export function AuthProvider({ children }) {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState(null);
+  const [pendingEventApplicationId, setPendingEventApplicationIdState] = useState(null);
+  const pendingEventApplicationRef = useRef(null);
+
+  const setPendingEventApplicationId = useCallback((eventId) => {
+    pendingEventApplicationRef.current = eventId;
+    setPendingEventApplicationIdState(eventId);
+  }, []);
+
+  const getPostAuthScreen = useCallback(() => (
+    pendingEventApplicationRef.current ? 'landing' : 'authenticated'
+  ), []);
 
   const showToast = (message, type = 'info') => {
     setToastMessage({ message, type, id: Date.now() });
@@ -40,10 +51,10 @@ export function AuthProvider({ children }) {
               })
             );
           }
-          setCurrentScreen('authenticated');
+          setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
         } catch (e) {
           console.error('Error fetching profile:', e);
-          setCurrentScreen('authenticated');
+          setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
         }
       } else {
         setUser(null);
@@ -70,7 +81,7 @@ export function AuthProvider({ children }) {
       });
       setUser({ uid: 'demo_user_1', email });
       setUserProfile(mockProfile);
-      setCurrentScreen('authenticated');
+      setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
       showToast(`Signed in as ${mockProfile.displayName} (Demo mode)`, 'info');
       return;
     }
@@ -115,7 +126,7 @@ export function AuthProvider({ children }) {
       });
       setUser({ uid: 'google_demo_1', email: 'elena.vance@example.com' });
       setUserProfile(mockProfile);
-      setCurrentScreen('authenticated');
+      setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
       showToast('Signed in with Google! (Demo mode)', 'info');
       return;
     }
@@ -136,7 +147,7 @@ export function AuthProvider({ children }) {
     });
     setUser({ uid: mockProfile.uid, phoneNumber: phone });
     setUserProfile(mockProfile);
-    setCurrentScreen('authenticated');
+    setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
     showToast('Phone verified successfully!', 'success');
   };
 
@@ -183,8 +194,12 @@ export function AuthProvider({ children }) {
       value={{
         currentScreen,
         setCurrentScreen,
+        pendingEventApplicationId,
+        setPendingEventApplicationId,
+        getPostAuthScreen,
         user,
         userProfile,
+        setUserProfile,
         loading,
         isFirebaseConfigured,
         toastMessage,

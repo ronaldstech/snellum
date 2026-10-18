@@ -13,12 +13,12 @@ import { paymentService } from '../../services/paymentService';
 import StripeCheckoutModal from './StripeCheckoutModal';
 import '../../styles/premium.css';
 
-export default function PremiumStoreModal({ isOpen, onClose }) {
+export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) {
   const { userProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('memberships'); // 'memberships' | 'sparks'
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'weekly'
 
-  // Stripe Checkout Modal state
+  // Fallback Stripe Checkout Modal state if cart handler not provided
   const [stripeModalConfig, setStripeModalConfig] = useState({
     isOpen: false,
     itemType: 'subscription',
@@ -31,22 +31,38 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
   const subscriptionPlans = paymentService.getSubscriptionPlans();
   const sparkPackages = paymentService.getSparkPackages();
 
-  const handleOpenStripeSub = (plan) => {
-    setStripeModalConfig({
-      isOpen: true,
-      itemType: 'subscription',
-      itemData: plan,
-      billingCycle,
-    });
+  const handleProceedSub = (plan) => {
+    if (onProceedToCart) {
+      onProceedToCart({
+        itemType: 'subscription',
+        itemData: plan,
+        billingCycle,
+      });
+    } else {
+      setStripeModalConfig({
+        isOpen: true,
+        itemType: 'subscription',
+        itemData: plan,
+        billingCycle,
+      });
+    }
   };
 
-  const handleOpenStripeSparks = (pkg) => {
-    setStripeModalConfig({
-      isOpen: true,
-      itemType: 'sparks',
-      itemData: pkg,
-      billingCycle: 'one_time',
-    });
+  const handleProceedSparks = (pkg) => {
+    if (onProceedToCart) {
+      onProceedToCart({
+        itemType: 'sparks',
+        itemData: pkg,
+        billingCycle: 'one_time',
+      });
+    } else {
+      setStripeModalConfig({
+        isOpen: true,
+        itemType: 'sparks',
+        itemData: pkg,
+        billingCycle: 'one_time',
+      });
+    }
   };
 
   return (
@@ -168,7 +184,7 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
                         <button
                           type="button"
                           className={`drawer-plan-btn ${plan.popular ? 'btn-vip-highlight' : ''}`}
-                          onClick={() => handleOpenStripeSub(plan)}
+                          onClick={() => handleProceedSub(plan)}
                         >
                           <CreditCard size={15} /> Upgrade to {plan.name}
                         </button>
@@ -222,7 +238,7 @@ export default function PremiumStoreModal({ isOpen, onClose }) {
                       <button
                         type="button"
                         className="spark-buy-btn"
-                        onClick={() => handleOpenStripeSparks(pkg)}
+                        onClick={() => handleProceedSparks(pkg)}
                       >
                         <CreditCard size={13} /> Buy
                       </button>

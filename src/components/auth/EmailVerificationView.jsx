@@ -3,7 +3,7 @@ import { Mail, CheckCircle2, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function EmailVerificationView() {
-  const { user, setCurrentScreen, showToast } = useAuth();
+  const { user, setCurrentScreen, getPostAuthScreen, showToast } = useAuth();
   const [isResending, setIsResending] = useState(false);
 
   const handleResend = () => {
@@ -61,7 +61,7 @@ export default function EmailVerificationView() {
           className="btn-primary"
           onClick={() => {
             showToast('Email verified!', 'success');
-            setCurrentScreen('authenticated');
+            setCurrentScreen(getPostAuthScreen());
           }}
         >
           I've Verified <ArrowRight size={15} />

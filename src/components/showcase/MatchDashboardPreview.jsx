@@ -21,14 +21,16 @@ import MessagesPage from '../chat/MessagesPage';
 import ProfileScreen from '../profile/ProfileScreen';
 import PremiumStoreModal from '../premium/PremiumStoreModal';
 import NotificationDrawer from '../notifications/NotificationDrawer';
+import CartCheckoutPage from '../cart/CartCheckoutPage';
 import '../../styles/dashboard.css';
 
 export default function MatchDashboardPreview() {
   const { user, userProfile } = useAuth();
 
   // Navigation State
-  const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | profile
+  const [activeTab, setActiveTab] = useState('discover'); // discover | explore | likes | messages | profile | cart
   const [selectedChat, setSelectedChat] = useState(null);
+  const [cartCheckoutItem, setCartCheckoutItem] = useState(null);
 
   // Modals & Drawers
   const [showPremiumStore, setShowPremiumStore] = useState(false);
@@ -37,6 +39,13 @@ export default function MatchDashboardPreview() {
   const [showProfile, setShowProfile] = useState(false);
 
   const activeFilterCount = useMemo(() => countActiveFilters(userProfile), [userProfile]);
+
+  const handleProceedToCart = (item) => {
+    setCartCheckoutItem(item);
+    setShowPremiumStore(false);
+    setActiveTab('cart');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleStartChatWithPartner = async (partner) => {
     const myUid = user?.uid;
@@ -242,6 +251,16 @@ export default function MatchDashboardPreview() {
             onOpenPremium={() => setShowPremiumStore(true)}
           />
         )}
+
+        {activeTab === 'cart' && (
+          <CartCheckoutPage
+            item={cartCheckoutItem}
+            onBack={() => {
+              setActiveTab('discover');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
       </main>
 
       {/* Mobile Bottom Tab Navigation */}
@@ -308,6 +327,7 @@ export default function MatchDashboardPreview() {
       <PremiumStoreModal
         isOpen={showPremiumStore}
         onClose={() => setShowPremiumStore(false)}
+        onProceedToCart={handleProceedToCart}
       />
 
       <NotificationDrawer

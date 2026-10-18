@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Heart,
   Flame,
@@ -28,7 +28,7 @@ import { shareService } from '../../services/shareService';
 import '../../styles/landing.css';
 
 export default function LandingPage() {
-  const { setCurrentScreen, user } = useAuth();
+  const { setCurrentScreen, user, pendingEventApplicationId, setPendingEventApplicationId } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileIndex, setProfileIndex] = useState(0);
 
@@ -50,6 +50,8 @@ export default function LandingPage() {
     setCurrentScreen(screen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const clearPendingEventApplication = useCallback(() => setPendingEventApplicationId(null), [setPendingEventApplicationId]);
 
   const handleShareReferral = async () => {
     const res = await shareService.shareContent({
@@ -87,7 +89,7 @@ export default function LandingPage() {
             <ul className="landing-nav-links">
               <li><a href="#about">About</a></li>
 
-              <li><a href="#events">Singles Events</a></li>
+              <li><a href="#events">Events</a></li>
               <li><a href="#blog">Dating Tips</a></li>
               <li><a href="#pricing">VIP Pricing</a></li>
             </ul>
@@ -118,7 +120,7 @@ export default function LandingPage() {
           <div className="mobile-nav-links">
             <a href="#about" onClick={() => setMobileMenuOpen(false)}>About</a>
 
-            <a href="#events" onClick={() => setMobileMenuOpen(false)}>Singles Events</a>
+            <a href="#events" onClick={() => setMobileMenuOpen(false)}>Events</a>
             <a href="#blog" onClick={() => setMobileMenuOpen(false)}>Dating Tips</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>VIP Pricing</a>
           </div>
@@ -269,8 +271,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. Search-Indexed Singles Events & Mixers */}
-      <DatingEventsSection onNavigateAuth={handleNavigate} />
+      {/* 4. Events */}
+      <DatingEventsSection
+        onNavigateAuth={handleNavigate}
+        pendingEventApplicationId={pendingEventApplicationId}
+        onPendingEventApplicationHandled={clearPendingEventApplication}
+      />
 
       {/* 5. Dating Tips & Advice Blog */}
       <DatingTipsSection onNavigateAuth={handleNavigate} />
@@ -404,7 +410,7 @@ export default function LandingPage() {
             <nav className="footer-nav">
               <a href="#about">About</a>
 
-              <a href="#events">Singles Events</a>
+              <a href="#events">Events</a>
               <a href="#blog">Dating Tips</a>
               <a href="#pricing">VIP Pricing</a>
               <a onClick={() => handleNavigate('signin')}>Sign In</a>

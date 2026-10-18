@@ -1,9 +1,11 @@
-import { UserRound, X } from 'lucide-react';
+import { LogOut, UserRound, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import ProfilePanel from './ProfilePanel';
 import ThemeToggle from '../common/ThemeToggle';
 import '../../styles/profile.css';
 
 export default function ProfileSidebar({ isOpen, onClose, onOpenPremium }) {
+  const { logout } = useAuth();
   if (!isOpen) return null;
 
   return (
@@ -29,6 +31,11 @@ export default function ProfileSidebar({ isOpen, onClose, onOpenPremium }) {
           </div>
           <ProfilePanel mode="sidebar" onOpenPremium={onOpenPremium} />
         </div>
+        <footer className="profile-drawer-footer">
+          <button type="button" className="settings-signout-button" onClick={async () => { await logout(); onClose(); }}>
+            <LogOut size={17} /> Sign out of Snellum
+          </button>
+        </footer>
       </aside>
     </div>
   );
