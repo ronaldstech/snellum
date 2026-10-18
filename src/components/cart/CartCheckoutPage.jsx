@@ -15,24 +15,33 @@ import {
 import confetti from 'canvas-confetti';
 import { useAuth } from '../../context/AuthContext';
 import { paymentService } from '../../services/paymentService';
+import usePremiumPricing from '../../hooks/usePremiumPricing';
 import '../../styles/cart.css';
 
 export default function CartCheckoutPage({ item, onBack, onSuccess }) {
   const { user, userProfile, showToast, setUserProfile } = useAuth();
+  const { pricing, loading: pricingLoading } = usePremiumPricing();
 
   // If no item is passed (e.g. direct nav), fallback to default popular plan
   const activeItem = useMemo(() => {
     if (item?.itemData) return item;
-    const defaultPlan = paymentService.getSubscriptionPlans().find((p) => p.popular) || paymentService.getSubscriptionPlans()[1];
+    const plans = paymentService.getSubscriptionPlans(pricing || {});
+    const defaultPlan = plans.find((p) => p.popular) || plans[1];
     return {
       itemType: 'subscription',
       itemData: defaultPlan,
       billingCycle: 'monthly',
     };
-  }, [item]);
+  }, [item, pricing]);
 
   const isSubscription = activeItem.itemType === 'subscription';
-  const planOrPkg = activeItem.itemData;
+  const configuredItem = isSubscription
+    ? paymentService.getSubscriptionPlans(pricing || {}).find((plan) => plan.id === activeItem.itemData?.id) || activeItem.itemData
+    : paymentService.getSparkPackages(pricing || {}).find((pkg) => pkg.id === activeItem.itemData?.id);
+  const pricingItemAvailable = isSubscription
+    ? Boolean(pricing?.plans?.[activeItem.itemData?.id])
+    : Boolean(configuredItem);
+  const planOrPkg = configuredItem || activeItem.itemData;
   const billingCycle = activeItem.billingCycle || 'monthly';
 
   // 1. Billing Address State
@@ -117,6 +126,11 @@ export default function CartCheckoutPage({ item, onBack, onSuccess }) {
   // Execute Payment
   const handleCompletePayment = async (e) => {
     if (e) e.preventDefault();
+
+    if (pricingLoading || !pricing || !pricingItemAvailable) {
+      showToast('Current pricing could not be loaded. Please try again before paying.', 'error');
+      return;
+    }
 
     // Basic validation
     if (!billingAddress.fullName.trim()) {
@@ -550,7 +564,7 @@ export default function CartCheckoutPage({ item, onBack, onSuccess }) {
                 <button
                   type="button"
                   className="btn-wallet-express"
-                  disabled={isProcessing}
+                  disabled={isProcessing || pricingLoading || !pricing || !pricingItemAvailable}
                   onClick={handleCompletePayment}
                 >
                   <Lock size={16} /> Pay with Apple Pay / GPay ({priceDisplay})
@@ -563,7 +577,7 @@ export default function CartCheckoutPage({ item, onBack, onSuccess }) {
               <button
                 type="submit"
                 className="btn-complete-payment"
-                disabled={isProcessing}
+                disabled={isProcessing || pricingLoading || !pricing || !pricingItemAvailable}
               >
                 {isProcessing ? (
                   <span>Authorizing Payment…</span>
@@ -616,7 +630,7 @@ export default function CartCheckoutPage({ item, onBack, onSuccess }) {
                 <span>{priceDisplay}</span>
               </div>
               <div className="cart-calc-row">
-                <span>Local Equivalent</span>
+                <span>Currency</span>
                 <span>{localPriceDisplay}</span>
               </div>
               <div className="cart-calc-row">

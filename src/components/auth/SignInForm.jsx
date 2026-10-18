@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import InputField from '../common/InputField';
-import SocialButton from '../common/SocialButton';
+import SocialButton, { AppleMark } from '../common/SocialButton';
 
 export default function SignInForm({ onOpenForgotPassword }) {
-  const { loginWithEmail, loginWithGoogle, setCurrentScreen, showToast } = useAuth();
+  const { loginWithEmail, loginWithGoogle, loginWithApple, setCurrentScreen, showToast } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -46,6 +46,17 @@ export default function SignInForm({ onOpenForgotPassword }) {
       await loginWithGoogle();
     } catch (err) {
       showToast('Google sign-in cancelled or failed', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAppleAuth = async () => {
+    setIsLoading(true);
+    try {
+      await loginWithApple();
+    } catch (err) {
+      showToast(err.message || 'Apple sign-in failed', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -148,6 +159,12 @@ export default function SignInForm({ onOpenForgotPassword }) {
           text="Continue with Google"
           imageSrc="/google_logo.png"
           onClick={handleGoogleAuth}
+          disabled={isLoading}
+        />
+        <SocialButton
+          text="Continue with Apple"
+          icon={AppleMark}
+          onClick={handleAppleAuth}
           disabled={isLoading}
         />
         <SocialButton

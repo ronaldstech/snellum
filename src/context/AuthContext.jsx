@@ -136,6 +136,27 @@ export function AuthProvider({ children }) {
     return fbUser;
   };
 
+  const loginWithApple = async () => {
+    if (!isFirebaseConfigured) {
+      const mockProfile = new UserProfile({
+        uid: 'apple_demo_1',
+        firstName: 'Apple Member',
+        email: 'apple.member@example.com',
+        isVerified: true,
+        sparks: 100,
+      });
+      setUser({ uid: mockProfile.uid, email: mockProfile.email });
+      setUserProfile(mockProfile);
+      setCurrentScreen(pendingEventApplicationRef.current ? 'landing' : 'authenticated');
+      showToast('Signed in with Apple (Demo mode)', 'info');
+      return;
+    }
+
+    const fbUser = await authService.signInWithApple();
+    showToast('Signed in with Apple!', 'success');
+    return fbUser;
+  };
+
   const loginWithPhoneOtp = async (phone, otp) => {
     // Phone OTP flow
     const mockProfile = new UserProfile({
@@ -209,6 +230,7 @@ export function AuthProvider({ children }) {
         loginWithEmail,
         signUpWithEmail,
         loginWithGoogle,
+        loginWithApple,
         loginWithPhoneOtp,
         sendPasswordReset,
         logout,

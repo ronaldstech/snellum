@@ -24,11 +24,13 @@ import PublicProfileModal from '../profile/PublicProfileModal';
 import ShareModal from '../common/ShareModal';
 import { PUBLIC_PROFILES } from '../../data/publicProfilesData';
 import { paymentService } from '../../services/paymentService';
+import usePremiumPricing from '../../hooks/usePremiumPricing';
 import { shareService } from '../../services/shareService';
 import '../../styles/landing.css';
 
 export default function LandingPage() {
   const { setCurrentScreen, user, pendingEventApplicationId, setPendingEventApplicationId } = useAuth();
+  const { pricing } = usePremiumPricing();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileIndex, setProfileIndex] = useState(0);
 
@@ -38,7 +40,7 @@ export default function LandingPage() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const activeHeroProfile = PUBLIC_PROFILES[profileIndex] || PUBLIC_PROFILES[0];
-  const subscriptionPlans = paymentService.getSubscriptionPlans();
+  const subscriptionPlans = paymentService.getSubscriptionPlans(pricing || {});
   const referralLink = shareService.getReferralLink(user);
 
   const handleNextHeroProfile = () => {
@@ -296,7 +298,8 @@ export default function LandingPage() {
           </div>
 
           <div className="landing-pricing-grid">
-            {subscriptionPlans.map((plan) => (
+            {!pricing && <p>Current membership pricing is unavailable.</p>}
+            {pricing && subscriptionPlans.map((plan) => (
               <div
                 key={plan.id}
                 className={`landing-pricing-card ${plan.popular ? 'popular' : ''}`}
@@ -309,7 +312,7 @@ export default function LandingPage() {
                     <strong className="rate-amount">{plan.usdMonthlyPrice}</strong>
                     <span className="rate-period">/ month</span>
                   </div>
-                  <span className="pricing-local">or {plan.monthlyPrice} / month</span>
+                  <span className="pricing-local">Billed monthly</span>
                 </div>
 
                 <ul className="pricing-features">

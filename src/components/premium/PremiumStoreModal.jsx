@@ -10,11 +10,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { paymentService } from '../../services/paymentService';
+import usePremiumPricing from '../../hooks/usePremiumPricing';
 import StripeCheckoutModal from './StripeCheckoutModal';
 import '../../styles/premium.css';
 
 export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) {
   const { userProfile } = useAuth();
+  const { pricing, loading, error } = usePremiumPricing();
   const [activeTab, setActiveTab] = useState('memberships'); // 'memberships' | 'sparks'
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'weekly'
 
@@ -28,8 +30,8 @@ export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) 
 
   if (!isOpen) return null;
 
-  const subscriptionPlans = paymentService.getSubscriptionPlans();
-  const sparkPackages = paymentService.getSparkPackages();
+  const subscriptionPlans = paymentService.getSubscriptionPlans(pricing || {});
+  const sparkPackages = paymentService.getSparkPackages(pricing || {});
 
   const handleProceedSub = (plan) => {
     if (onProceedToCart) {
@@ -147,6 +149,9 @@ export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) 
 
                 {/* Plans List */}
                 <div className="drawer-plans-list">
+                  {loading && <p>Loading current prices…</p>}
+                  {error && <p role="alert">{error}</p>}
+                  {!loading && !error && !pricing && <p>Pricing is not configured yet.</p>}
                   {subscriptionPlans.map((plan) => {
                     const priceDisplay =
                       billingCycle === 'monthly' ? plan.usdMonthlyPrice : plan.usdWeeklyPrice;
@@ -185,6 +190,7 @@ export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) 
                           type="button"
                           className={`drawer-plan-btn ${plan.popular ? 'btn-vip-highlight' : ''}`}
                           onClick={() => handleProceedSub(plan)}
+                          disabled={loading || !pricing}
                         >
                           <CreditCard size={15} /> Upgrade to {plan.name}
                         </button>
@@ -215,6 +221,9 @@ export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) 
 
                 {/* Packages List */}
                 <div className="sparks-packages-list">
+                  {loading && <p>Loading current prices…</p>}
+                  {error && <p role="alert">{error}</p>}
+                  {!loading && !error && sparkPackages.length === 0 && <p>No Spark bundles are currently available.</p>}
                   {sparkPackages.map((pkg) => (
                     <div
                       key={pkg.id}
@@ -239,6 +248,7 @@ export default function PremiumStoreModal({ isOpen, onClose, onProceedToCart }) 
                         type="button"
                         className="spark-buy-btn"
                         onClick={() => handleProceedSparks(pkg)}
+                        disabled={loading || !pricing}
                       >
                         <CreditCard size={13} /> Buy
                       </button>

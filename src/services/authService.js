@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  OAuthProvider,
   signOut as fbSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -101,6 +102,39 @@ export const authService = {
         sparks: 100,
       });
 
+      await setDoc(userDocRef, {
+        ...profile.toMap(),
+        createdAt: serverTimestamp(),
+        lastUpdated: serverTimestamp(),
+      });
+    }
+
+    return user;
+  },
+
+  // Apple Sign In
+  async signInWithApple() {
+    if (!auth || !db) throw new Error('Firebase is not configured. Please add your credentials in .env');
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userDocRef);
+    if (!docSnap.exists()) {
+      const appleProfile = result.user.providerData.find((item) => item.providerId === 'apple.com');
+      const profile = new UserProfile({
+        uid: user.uid,
+        firstName: user.displayName || appleProfile?.displayName || 'Snellum Member',
+        email: user.email,
+        photos: user.photoURL ? [user.photoURL] : [],
+        isEmailVerified: user.emailVerified,
+        isVerified: true,
+        verificationStatus: 'verified',
+        sparks: 100,
+      });
       await setDoc(userDocRef, {
         ...profile.toMap(),
         createdAt: serverTimestamp(),

@@ -3,11 +3,11 @@ import { User, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import InputField from '../common/InputField';
 import PhoneInputField from '../common/PhoneInputField';
-import SocialButton from '../common/SocialButton';
+import SocialButton, { AppleMark } from '../common/SocialButton';
 import { COUNTRY_CODES } from '../../constants/countryCodes';
 
 export default function SignUpForm() {
-  const { signUpWithEmail, loginWithGoogle, setCurrentScreen, showToast } = useAuth();
+  const { signUpWithEmail, loginWithGoogle, loginWithApple, setCurrentScreen, showToast } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
@@ -67,6 +67,17 @@ export default function SignUpForm() {
       });
     } catch (err) {
       showToast(err.message || 'Failed to create account', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAppleAuth = async () => {
+    setIsLoading(true);
+    try {
+      await loginWithApple();
+    } catch (err) {
+      showToast(err.message || 'Apple sign-up failed', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +204,12 @@ export default function SignUpForm() {
           text="Continue with Google"
           imageSrc="/google_logo.png"
           onClick={loginWithGoogle}
+          disabled={isLoading}
+        />
+        <SocialButton
+          text="Continue with Apple"
+          icon={AppleMark}
+          onClick={handleAppleAuth}
           disabled={isLoading}
         />
       </div>

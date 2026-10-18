@@ -15,6 +15,7 @@ import {
 import confetti from 'canvas-confetti';
 import { stripeService } from '../../services/stripeService';
 import { paymentService } from '../../services/paymentService';
+import usePremiumPricing from '../../hooks/usePremiumPricing';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/stripeCheckout.css';
 
@@ -26,6 +27,7 @@ export default function StripeCheckoutModal({
   billingCycle = 'monthly',
 }) {
   const { user, userProfile, showToast } = useAuth();
+  const { pricing, loading: pricingLoading } = usePremiumPricing();
 
   // Payment method selection: 'apple_pay' | 'google_pay' | 'card'
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -49,31 +51,35 @@ export default function StripeCheckoutModal({
   const isSub = itemType === 'subscription';
   const isSparks = itemType === 'sparks';
   const isEvent = itemType === 'event';
+  const currentItemData = isSub
+    ? paymentService.getSubscriptionPlans(pricing || {}).find((plan) => plan.id === itemData?.id)
+    : isSparks
+      ? paymentService.getSparkPackages(pricing || {}).find((pkg) => pkg.id === itemData?.id)
+      : itemData;
+  const pricingItemAvailable = isEvent || (isSub
+    ? Boolean(pricing?.plans?.[itemData?.id])
+    : Boolean(currentItemData));
 
   let itemName = 'Snellum Upgrade';
-  let priceUSD = '$9.99';
-  let appStorePriceUSD = '$14.99';
-  let amountCents = 999;
-  let mwkPrice = 'MK 15,000';
+  let priceUSD = '$0.00';
+  let amountCents = 0;
+  let mwkPrice = 'USD';
 
-  if (isSub && itemData) {
-    itemName = `${itemData.name} (${billingCycle === 'monthly' ? 'Monthly' : 'Weekly'})`;
-    priceUSD = billingCycle === 'monthly' ? itemData.usdMonthlyPrice : itemData.usdWeeklyPrice;
-    amountCents = billingCycle === 'monthly' ? itemData.monthlyCents : itemData.weeklyCents;
-    appStorePriceUSD = itemData.appStoreMonthlyPrice || '$14.99';
-    mwkPrice = billingCycle === 'monthly' ? itemData.monthlyPrice : itemData.weeklyPrice;
-  } else if (isSparks && itemData) {
-    itemName = `${itemData.sparks} Sparks Credits`;
-    priceUSD = itemData.usdPrice;
-    amountCents = itemData.cents;
-    appStorePriceUSD = itemData.appStoreUsdPrice || '$9.99';
-    mwkPrice = itemData.price;
-  } else if (isEvent && itemData) {
-    itemName = `Ticket: ${itemData.title}`;
+  if (isSub && currentItemData) {
+    itemName = `${currentItemData.name} (${billingCycle === 'monthly' ? 'Monthly' : 'Weekly'})`;
+    priceUSD = billingCycle === 'monthly' ? currentItemData.usdMonthlyPrice : currentItemData.usdWeeklyPrice;
+    amountCents = billingCycle === 'monthly' ? currentItemData.monthlyCents : currentItemData.weeklyCents;
+    mwkPrice = 'USD';
+  } else if (isSparks && currentItemData) {
+    itemName = `${currentItemData.sparks} Sparks Credits`;
+    priceUSD = currentItemData.usdPrice;
+    amountCents = currentItemData.cents;
+    mwkPrice = 'USD';
+  } else if (isEvent && currentItemData) {
+    itemName = `Ticket: ${currentItemData.title}`;
     priceUSD = '$9.99';
     amountCents = itemData.cents || 999;
-    appStorePriceUSD = '$14.99';
-    mwkPrice = itemData.price;
+    mwkPrice = currentItemData.price;
   }
 
   // Check Payment Request API (Apple Pay / Google Pay)
@@ -132,22 +138,26 @@ export default function StripeCheckoutModal({
   };
 
   const handleExecutePayment = async (methodType = paymentMethod) => {
+    if (!isEvent && (pricingLoading || !pricingItemAvailable)) {
+      showToast('Current pricing could not be loaded. Please try again before paying.', 'error');
+      return;
+    }
     setProcessing(true);
     try {
       const result = await stripeService.processDirectWebPayment({
         amountCents,
         currency: 'usd',
-        planOrPackageId: itemData?.id,
+        planOrPackageId: currentItemData?.id,
         description: itemName,
         paymentMethodType: methodType,
       });
 
       // Update state in Firestore / context
       if (user?.uid) {
-        if (isSub && itemData?.id) {
-          await paymentService.activateSubscription(user.uid, itemData.id, billingCycle);
-        } else if (isSparks && itemData?.sparks) {
-          await paymentService.addSparksToAccount(user.uid, itemData.sparks);
+        if (isSub && currentItemData?.id) {
+          await paymentService.activateSubscription(user.uid, currentItemData.id, billingCycle);
+        } else if (isSparks && currentItemData?.sparks) {
+          await paymentService.addSparksToAccount(user.uid, currentItemData.sparks);
         }
       }
 
@@ -255,7 +265,7 @@ export default function StripeCheckoutModal({
                 <button
                   type="button"
                   className="btn-apple-pay"
-                  disabled={processing}
+                  disabled={processing || (!isEvent && (pricingLoading || !pricingItemAvailable))}
                   onClick={() => handleExecutePayment('apple_pay')}
                 >
                   <span>Pay with</span>
@@ -264,7 +274,7 @@ export default function StripeCheckoutModal({
                 <button
                   type="button"
                   className="btn-google-pay"
-                  disabled={processing}
+                  disabled={processing || (!isEvent && (pricingLoading || !pricingItemAvailable))}
                   onClick={() => handleExecutePayment('google_pay')}
                 >
                   <span>Pay with</span>
@@ -362,7 +372,7 @@ export default function StripeCheckoutModal({
               <button
                 type="submit"
                 className="btn-stripe-pay"
-                disabled={processing}
+                disabled={processing || (!isEvent && (pricingLoading || !pricingItemAvailable))}
               >
                 {processing ? (
                   <span>Securing Payment with Stripe...</span>

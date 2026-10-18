@@ -1,6 +1,26 @@
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from './firebase';
 
+const planFeatures = {
+  pro: ['5 Super Likes / day', '1 Free Boost / week', 'See who likes your profile', 'Unlimited Rewinds on left swipes', 'Zero Ads & Faster Matching'],
+  premium: ['Unlimited Daily Likes', 'Priority Match Queue Placement', 'Read Receipts on all chats', 'Incognito & Travel Mode', 'Direct VIP Chat before matching'],
+  elite: ['VIP Verified Gold Badge', 'Priority Video & Meetup Requests', 'Exclusive VIP Lounge Access', 'Dedicated Matchmaking Concierge', '500 Monthly Sparks allowance'],
+};
+
+const usd = (value) => `$${Number(value || 0).toFixed(2)}`;
+const makePlan = (id, prices = {}) => ({
+  id,
+  name: `Snellum ${id[0].toUpperCase()}${id.slice(1)}`,
+  weeklyPrice: usd(prices.weekly),
+  monthlyPrice: usd(prices.monthly),
+  usdWeeklyPrice: usd(prices.weekly),
+  usdMonthlyPrice: usd(prices.monthly),
+  weeklyCents: Math.round(Number(prices.weekly || 0) * 100),
+  monthlyCents: Math.round(Number(prices.monthly || 0) * 100),
+  features: planFeatures[id] || [],
+  popular: id === 'premium',
+});
+
 export const paymentService = {
   // Mobile money operators matching Flutter PayChangu integration + Stripe Web Direct
   getMobileOperators() {
@@ -11,103 +31,22 @@ export const paymentService = {
     ];
   },
 
-  // Credit pricing tiers with MWK & USD (for Stripe web direct)
-  getSparkPackages() {
-    return [
-      {
-        id: 'sparks_100',
-        sparks: 100,
-        price: 'MK 2,500',
-        amount: 2500,
-        usdPrice: '$1.99',
-        cents: 199,
-        appStoreUsdPrice: '$2.99',
-        popular: false,
-      },
-      {
-        id: 'sparks_500',
-        sparks: 550,
-        bonus: '+50 Bonus Sparks',
-        price: 'MK 10,000',
-        amount: 10000,
-        usdPrice: '$6.99',
-        cents: 699,
-        appStoreUsdPrice: '$9.99',
-        popular: true,
-      },
-      {
-        id: 'sparks_1200',
-        sparks: 1400,
-        bonus: '+200 Bonus Sparks',
-        price: 'MK 25,000',
-        amount: 25000,
-        usdPrice: '$14.99',
-        cents: 1499,
-        appStoreUsdPrice: '$21.99',
-        popular: false,
-      },
-    ];
+  getSparkPackages(pricing = {}) {
+    return (pricing.creditBundles || []).map((bundle) => ({
+      id: `sparks_${bundle.amount}`,
+      sparks: Number(bundle.amount || 0) + Number(bundle.bonus || 0),
+      baseSparks: Number(bundle.amount || 0),
+      bonus: Number(bundle.bonus || 0) ? `+${Number(bundle.bonus).toLocaleString()} Bonus Sparks` : '',
+      price: usd(bundle.priceUsd),
+      amount: Math.round(Number(bundle.priceUsd || 0) * 100),
+      usdPrice: usd(bundle.priceUsd),
+      cents: Math.round(Number(bundle.priceUsd || 0) * 100),
+      popular: Boolean(bundle.popular),
+    }));
   },
 
-  // Premium membership tiers
-  getSubscriptionPlans() {
-    return [
-      {
-        id: 'pro',
-        name: 'Snellum Pro',
-        weeklyPrice: 'MK 5,000',
-        monthlyPrice: 'MK 10,000',
-        usdWeeklyPrice: '$3.49',
-        usdMonthlyPrice: '$6.99',
-        weeklyCents: 349,
-        monthlyCents: 699,
-        appStoreMonthlyPrice: '$9.99',
-        features: [
-          '5 Super Likes / day',
-          '1 Free Boost / week',
-          'See who likes your profile',
-          'Unlimited Rewinds on left swipes',
-          'Zero Ads & Faster Matching',
-        ],
-      },
-      {
-        id: 'premium',
-        name: 'Snellum Premium',
-        weeklyPrice: 'MK 7,000',
-        monthlyPrice: 'MK 15,000',
-        usdWeeklyPrice: '$4.99',
-        usdMonthlyPrice: '$9.99',
-        weeklyCents: 499,
-        monthlyCents: 999,
-        appStoreMonthlyPrice: '$14.99',
-        popular: true,
-        features: [
-          'Unlimited Daily Likes',
-          'Priority Match Queue Placement',
-          'Read Receipts on all chats',
-          'Incognito & Travel Mode',
-          'Direct VIP Chat before matching',
-        ],
-      },
-      {
-        id: 'elite',
-        name: 'Snellum Elite',
-        weeklyPrice: 'MK 10,000',
-        monthlyPrice: 'MK 30,000',
-        usdWeeklyPrice: '$7.49',
-        usdMonthlyPrice: '$19.99',
-        weeklyCents: 749,
-        monthlyCents: 1999,
-        appStoreMonthlyPrice: '$28.99',
-        features: [
-          'VIP Verified Gold Badge',
-          'Priority Video & Meetup Requests',
-          'Exclusive VIP Lounge Access',
-          'Dedicated Matchmaking Concierge',
-          '500 Monthly Sparks allowance',
-        ],
-      },
-    ];
+  getSubscriptionPlans(pricing = {}) {
+    return ['pro', 'premium', 'elite'].map((id) => makePlan(id, pricing.plans?.[id]));
   },
 
   // Process a mock or real payment
